@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Distrito Paulista RP — Painel de Gestão Administrativa e Dashboard Staff" />
+  <meta name="theme-color" content="#07080B" />
+  <title>Dashboard Administrativo — Distrito Paulista RP</title>
+
+  <link rel="icon" type="image/png" href="./assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+  <script>
+    // Proteção de rota antecipada: se não houver login, redireciona imediatamente para a tela de login
+    (function() {
+      try {
+        var auth = localStorage.getItem("dp_auth_user");
+        if (!auth) {
+          window.location.replace("login-staff.html");
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body class="dashboard-page-body">
+  <!-- Topbar Principal do Dashboard -->
+  <header class="dashboard-global-header">
+    <div class="dash-header-left">
+      <a href="./index.html" class="dash-back-btn" title="Voltar ao portal oficial">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Voltar ao Site</span>
+      </a>
+      <div class="dash-brand-sep"></div>
+      <img src="./assets/logo.png" alt="Distrito Paulista" class="dash-top-logo" />
+      <span class="badge-tag gold">PAINEL STAFF • V3.5</span>
+    </div>
+
+    <div class="dash-header-right">
+      <div class="dash-user-pill">
+        <div class="dash-user-avatar" id="dashUserAvatar">👑</div>
+        <div class="dash-user-text">
+          <strong id="dashUserName">Carregando...</strong>
+          <span class="user-role-badge ceo-badge" id="dashUserRoleBadge">CEO MASTER</span>
+        </div>
+        <button type="button" class="btn-icon-subtle" onclick="if(window.openSelfEditModal) window.openSelfEditModal();" title="Editar meu nome de exibição" aria-label="Editar meu nome" style="margin-left: 4px; padding: 4px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </button>
+      </div>
+      <button class="btn btn-secondary-danger btn-sm" id="dashLogoutBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Sair</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="dashboard-main-wrapper">
+    <!-- Sidebar de Navegação do Dashboard -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-menu-group">
+        <span class="sidebar-group-title">PAINEL PRINCIPAL</span>
+        <button class="dash-side-link active" data-tab="overview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Visão Geral</span>
+        </button>
+
+        <button class="dash-side-link" data-tab="applications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span>Candidaturas Staff</span>
+          <span class="counter-badge" id="dashPendingBadge">0</span>
+        </button>
+      </div>
+
+      <div class="sidebar-menu-group">
+        <span class="sidebar-group-title">CONTEÚDO & PUBLICAÇÃO</span>
+        <button class="dash-side-link" data-tab="contentEditor">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <span>Editor de Conteúdo</span>
+        </button>
+      </div>
+
+      <div class="sidebar-menu-group" id="sideGroupAdmin">
+        <span class="sidebar-group-title">DIREÇÃO & HIERARQUIA</span>
+        <button class="dash-side-link" data-tab="team" id="sideLinkTeam">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Equipe & Logins</span>
+        </button>
+
+        <button class="dash-side-link" data-tab="permissions" id="sideLinkPermissions">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>Permissões (CEO)</span>
+        </button>
+
+        <button class="dash-side-link" data-tab="audit" id="sideLinkAudit">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          <span>Trilha de Auditoria</span>
+        </button>
+      </div>
+
+      <div class="sidebar-footer-box">
+        <span class="system-status-indicator">
+          <span class="status-indicator online pulse"></span>
+          <span>Nuvem Supabase Ativa</span>
+        </span>
+      </div>
+    </aside>
+
+    <!-- Área de Conteúdo Dinâmico do Dashboard -->
+    <main class="dashboard-content-area">
+      <!-- ABA 1: VISÃO GERAL -->
+      <section class="dash-pane active" id="paneOverview">
+        <div class="pane-title-row">
+          <div>
+            <h2>Visão Geral do Distrito Paulista</h2>
+            <p class="muted-text">Métricas em tempo real, status das candidaturas e integridade do ecossistema.</p>
+          </div>
+          <button class="btn btn-gold" onclick="window.switchTab ? window.switchTab('contentEditor') : document.querySelector('[data-tab=contentEditor]')?.click()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            <span>Editar Conteúdo do Site</span>
+          </button>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card gold-border">
+            <div class="metric-icon">📥</div>
+            <div class="metric-data">
+              <span class="metric-label">Total de Candidaturas</span>
+              <strong class="metric-value" id="dashStatTotal">0</strong>
+            </div>
+          </div>
+          <div class="metric-card warning-border">
+            <div class="metric-icon">⏳</div>
+            <div class="metric-data">
+              <span class="metric-label">Aguardando Avaliação</span>
+              <strong class="metric-value text-warning" id="dashStatPending">0</strong>
+            </div>
+          </div>
+          <div class="metric-card success-border">
+            <div class="metric-icon">✅</div>
+            <div class="metric-data">
+              <span class="metric-label">Aprovados para Entrevista</span>
+              <strong class="metric-value text-success" id="dashStatApproved">0</strong>
+            </div>
+          </div>
+          <div class="metric-card danger-border">
+            <div class="metric-icon">❌</div>
+            <div class="metric-data">
+              <span class="metric-label">Inscrições Recusadas</span>
+              <strong class="metric-value text-danger" id="dashStatRejected">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-split-grid">
+          <div class="card glass-card">
+            <div class="card-header-styled">
+              <h4>⚡ Ações Rápidas de Gestão</h4>
+            </div>
+            <div class="quick-action-buttons">
+              <button class="btn btn-glass" onclick="window.switchTab ? window.switchTab('applications') : document.querySelector('[data-tab=applications]')?.click()">
+                <span>📋 Avaliar Novas Candidaturas</span>
+              </button>
+              <button class="btn btn-glass" onclick="window.switchTab ? window.switchTab('contentEditor') : document.querySelector('[data-tab=contentEditor]')?.click()">
+                <span>📜 Atualizar Código Penal ou Regras</span>
+              </button>
+              <button class="btn btn-gold" id="btnDashQuickCreate" onclick="openCreateUserModal()">
+                <span>➕ Criar Novo Login de Staff</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card glass-card">
+            <div class="card-header-styled">
+              <h4>🛡️ Privilégios do Cargo Atual</h4>
+            </div>
+            <div class="user-rights-summary" id="dashRightsSummary">
+              <!-- Injetado via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 2: CANDIDATURAS -->
+      <section class="dash-pane" id="paneApplications">
+        <div class="card glass-card">
+          <div class="pane-header-flex">
+            <div>
+              <h3>Gestão de Candidaturas de Staff</h3>
+              <p class="muted-text">Visualize as respostas detalhadas dos jogadores, perguntas situacionais e defina o parecer da comissão.</p>
+            </div>
+            <div class="filters-flex">
+              <input type="text" id="dashAppSearch" placeholder="Buscar por Nome ou Discord..." class="input-inline" />
+              <select id="dashAppFilter" class="select-inline">
+                <option value="all">Todas as Inscrições</option>
+                <option value="pending" selected>Apenas Pendentes</option>
+                <option value="reviewing">Em Análise</option>
+                <option value="approved">Aprovadas</option>
+                <option value="rejected">Recusadas</option>
+              </select>
+            </div>
+          <!-- Controle do Status do Formulário no Site (Aberto / Fechado) -->
+          <div class="recruitment-control-bar">
+            <div class="recruitment-control-info">
+              <span class="control-label">Status das Inscrições no Site:</span>
+              <span id="dashRecruitmentStatusBadge" class="recruitment-status-pill open">
+                <span class="status-indicator online pulse"></span>
+                <span id="dashRecruitmentStatusText">INSCRIÇÕES ABERTAS</span>
+              </span>
+            </div>
+            <div class="recruitment-control-actions">
+              <button type="button" class="btn btn-sm btn-success" id="btnRecruitmentOpen" title="Liberar formulário para preenchimento de jogadores">
+                <span>🟢 Abrir Formulário</span>
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary-danger" id="btnRecruitmentClose" title="Bloquear formulário e exibir aviso de vagas encerradas">
+                <span>🔴 Fechar Formulário</span>
+              </button>
+              <button type="button" class="btn btn-sm btn-gold" id="btnEditFormQuestions" onclick="openQuestionsModal()" title="Ver e editar perguntas do formulário de candidatura">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>📝 Ver &amp; Editar Perguntas do Formulário</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="dashApplicationsList" class="applications-container">
+            <!-- Injetado dinamicamente -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 3: EDITOR DE CONTEÚDO (REGRAS, CÓDIGO PENAL & NOSSA HISTÓRIA) -->
+      <section class="dash-pane" id="paneContentEditor">
+        <div class="card glass-card">
+          <div class="pane-header-flex">
+            <div>
+              <h3>Editor Central de Conteúdo Publicado</h3>
+              <p class="muted-text">Edite as Regras Gerais, Diretrizes da Polícia, Ilegal, Código Penal e Nossa História do Distrito Paulista.</p>
+            </div>
+            <div class="select-wrapper">
+              <select id="dashCategorySelect" class="select-styled">
+                <option value="gerais">⚖️ Regras Gerais da Cidade</option>
+                <option value="policia">🚓 Regras da Polícia & Forças da Lei</option>
+                <option value="ilegal">💀 Regras do Ilegal & Facções</option>
+                <option value="codigo_penal">📜 Código Penal Oficial de SP</option>
+                <option value="historia">🌆 Nossa História</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="rule-edit-form">
+            <div class="form-group">
+              <label for="dashContentTitle">Título Oficial da Seção / Artigo</label>
+              <input id="dashContentTitle" type="text" maxlength="140" class="input-styled" />
+            </div>
+
+            <div class="form-group">
+              <label for="dashContentBody">Conteúdo Publicado (Uma regra/parágrafo por linha)</label>
+              <textarea id="dashContentBody" rows="16" maxlength="30000" class="textarea-styled font-mono"></textarea>
+              <small class="help-text">Cada linha é formatada automaticamente no site oficial. Pressione Enter para adicionar uma nova linha.</small>
+            </div>
+
+            <div class="form-footer-flex">
+              <button id="dashSaveContentBtn" class="btn btn-gold btn-lg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Salvar & Publicar no Site</span>
+              </button>
+              <p id="dashSaveStatus" class="form-status" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 4: EQUIPE & LOGINS (CEO & DIRETORES) -->
+      <section class="dash-pane" id="paneTeam">
+        <div class="card glass-card">
+          <div class="pane-header-flex">
+            <div>
+              <h3>Gestão de Membros da Staff & Logins</h3>
+              <p class="muted-text">Cadastre novos acessos para moderadores, administradores e gerencie a hierarquia de cargos.</p>
+            </div>
+            <button class="btn btn-gold" onclick="openCreateUserModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+              <span>+ Criar Novo Login Staff</span>
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th>Membro / Usuário</th>
+                  <th>E-mail de Login</th>
+                  <th>Cargo Hierárquico</th>
+                  <th>Status</th>
+                  <th>Data de Entrada</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="dashTeamTableBody">
+                <!-- Preenchido via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 5: MATRIZ DE PERMISSÕES RBAC (EXCLUSIVO CEO) -->
+      <section class="dash-pane" id="panePermissions">
+        <div class="card glass-card">
+          <div class="pane-header-flex">
+            <div>
+              <div class="flex-align-center gap-8">
+                <span class="role-pill ceo">👑 EXCLUSIVO DO CEO MASTER</span>
+              </div>
+              <h3 class="margin-top-8">Matriz de Permissões de Cargos (RBAC)</h3>
+              <p class="muted-text">Defina com precisão quais privilégios cada nível hierárquico possui na gestão do Distrito Paulista.</p>
+            </div>
+            <button class="btn btn-gold" id="btnDashSavePerms">
+              <span>Salvar Matriz de Permissões</span>
+            </button>
+          </div>
+
+          <div class="permissions-matrix-wrapper">
+            <table class="styled-table matrix-table">
+              <thead>
+                <tr>
+                  <th>Funcionalidade / Ação</th>
+                  <th class="text-center">Suporte 🎧</th>
+                  <th class="text-center">Moderador 🛡️</th>
+                  <th class="text-center">Administrador ⚖️</th>
+                  <th class="text-center">Gerente 💼</th>
+                  <th class="text-center">Diretor ⚜️</th>
+                  <th class="text-center">CEO 👑</th>
+                </tr>
+              </thead>
+              <tbody id="dashPermsTableBody">
+                <!-- Injetado dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 6: LOGS DE AUDITORIA -->
+      <section class="dash-pane" id="paneAudit">
+        <div class="card glass-card">
+          <div class="pane-header-flex">
+            <div>
+              <h3>Trilha de Auditoria do Sistema</h3>
+              <p class="muted-text">Registro cronológico de todas as modificações, avaliações de candidaturas e acessos administrativos.</p>
+            </div>
+            <button class="btn btn-secondary" id="btnDashClearAudit">
+              <span>Limpar Histórico Antigo</span>
+            </button>
+          </div>
+
+          <div class="audit-logs-list" id="dashAuditContainer">
+            <!-- Injetado dinamicamente -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal para Criar Novo Membro da Staff -->
+  <div class="modal-backdrop hidden" id="createUserModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box card glass-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Criar Nova Conta de Staff</h3>
+        <button class="modal-close-btn" onclick="closeCreateUserModal()" aria-label="Fechar modal">✕</button>
+      </div>
+      <form id="createUserForm" class="modal-form" novalidate>
+        <div class="form-group">
+          <label for="newStaffName">Nome Completo / ID no Jogo *</label>
+          <input type="text" id="newStaffName" placeholder="Ex: Gabriel Souza | ID: 1540" required />
+        </div>
+        <div class="form-group">
+          <label for="newStaffEmail">E-mail Institucional *</label>
+          <input type="email" id="newStaffEmail" placeholder="nome@distritopaulista.com" required />
+        </div>
+        <div class="form-group">
+          <label for="newStaffPassword">Senha Temporária *</label>
+          <div class="input-with-button">
+            <input type="text" id="newStaffPassword" minlength="8" required />
+            <button type="button" class="btn btn-secondary" id="btnGeneratePass">Gerar Senha</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="newStaffRole">Cargo Inicial *</label>
+          <select id="newStaffRole" required>
+            <option value="suporte" selected>🎧 Suporte</option>
+            <option value="moderador">🛡️ Moderador</option>
+            <option value="administrador">⚖️ Administrador</option>
+            <option value="gerente">💼 Gerente</option>
+            <option value="diretor">⚜️ Diretor</option>
+            <option value="ceo">👑 CEO (Superadmin)</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateUserModal()">Cancelar</button>
+          <button type="submit" class="btn btn-gold">Criar Conta Agora</button>
+        </div>
+        <p id="createUserStatus" class="form-status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para Visualizar Detalhes Completos da Candidatura -->
+  <div class="modal-backdrop hidden" id="viewAppModal" role="dialog" aria-modal="true" aria-labelledby="viewAppTitle">
+    <div class="modal-box modal-box-large card glass-card">
+      <div class="modal-header">
+        <div class="flex-align-center gap-12">
+          <h3 id="viewAppTitle">Detalhes da Candidatura</h3>
+          <span class="badge" id="modalAppBadge">Pendente</span>
+        </div>
+        <button class="modal-close-btn" onclick="closeViewAppModal()" aria-label="Fechar modal">✕</button>
+      </div>
+      <div class="modal-body-scrollable" id="viewAppContent"></div>
+      <div class="modal-actions" id="viewAppActions"></div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Nome do Membro / Login -->
+  <div class="modal-backdrop hidden" id="editNameModal" role="dialog" aria-modal="true" aria-labelledby="editNameModalTitle">
+    <div class="modal-box card glass-card" style="max-width: 490px;">
+      <div class="modal-header">
+        <div class="flex-align-center gap-12">
+          <span style="font-size: 1.5rem;" id="editNameModalEmoji">👑</span>
+          <div>
+            <h3 id="editNameModalTitle" style="margin: 0; font-size: 1.25rem;">Editar Nome do Login</h3>
+            <span class="muted-text" id="editNameModalSubtitle" style="font-size: 0.8rem; display: block; margin-top: 2px;"></span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeEditNameModal()" aria-label="Fechar modal">✕</button>
+      </div>
+      <form id="editNameForm" class="modal-form" novalidate>
+        <input type="hidden" id="editMemberId" />
+        <div class="form-group">
+          <label for="editMemberNameInput">Nome de Exibição / Identificação no Servidor *</label>
+          <input type="text" id="editMemberNameInput" placeholder="Ex: Blaze / Lomba / Morgan" maxlength="80" class="input-styled" required />
+          <small class="help-text">Este nome será exibido na equipe, no cabeçalho e em todos os registros de auditoria da Staff.</small>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditNameModal()">Cancelar</button>
+          <button type="submit" class="btn btn-gold">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Salvar Alteração</span>
+          </button>
+        </div>
+        <p id="editNameStatus" class="form-status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para Ver e Editar Perguntas do Formulário de Recrutamento -->
+  <div class="modal-backdrop hidden" id="formQuestionsModal" role="dialog" aria-modal="true" aria-labelledby="formQuestionsTitle">
+    <div class="modal-box modal-box-large card glass-card" style="max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div class="flex-align-center gap-12">
+          <span style="font-size: 1.5rem;">📝</span>
+          <div>
+            <h3 id="formQuestionsTitle" style="margin: 0; font-size: 1.25rem;">Perguntas do Formulário de Recrutamento</h3>
+            <span class="muted-text" style="font-size: 0.82rem;">Visualize e edite as perguntas e enunciados que os candidatos respondem no site oficial.</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeQuestionsModal()" aria-label="Fechar modal">✕</button>
+      </div>
+
+      <div class="modal-body-scrollable" style="flex: 1; overflow-y: auto; padding: 24px;">
+        <div class="flex-between-center" style="margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <div class="flex-align-center gap-10">
+            <span class="badge gold" id="questionsCountBadge">Carregando perguntas...</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="resetQuestionsToDefault()">
+            <span>↺ Restaurar Perguntas Padrão</span>
+          </button>
+        </div>
+
+        <div id="questionsEditorList" class="questions-editor-list" style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- Injetado dinamicamente via JS -->
+        </div>
+      </div>
+
+      <div class="modal-actions" style="padding: 18px 24px; border-top: 1px solid var(--border-line); display: flex; justify-content: space-between; align-items: center;">
+        <span id="saveQuestionsStatus" class="form-status" style="margin: 0;"></span>
+        <div class="flex-align-center gap-10">
+          <button type="button" class="btn btn-secondary" onclick="closeQuestionsModal()">Fechar</button>
+          <button type="button" class="btn btn-gold" onclick="saveAllFormQuestions()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Salvar &amp; Atualizar Formulário</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts Notificações Flutuantes -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Script do Dashboard -->
+  <script type="module" src="./dashboard.js"></script>
+</body>
+</html>

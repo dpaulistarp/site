@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Distrito Paulista RP — Servidor FiveM de Roleplay em São Paulo. PMESP, Polícia Civil, Facções do Crime, SAMU e economia realista sem panelinha." />
+  <meta name="theme-color" content="#07080B" />
+  <title>Distrito Paulista RP — São Paulo FiveM Roleplay</title>
+
+  <!-- Favicon com logo oficial -->
+  <link rel="icon" type="image/png" href="./assets/logo.png" />
+
+  <!-- Google Fonts: Inter & Rajdhani para o visual FiveM -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="site-paulista-theme">
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo principal</a>
+
+  <!-- 1. Ticker Tático Superior de Status do FiveM -->
+  <div class="server-top-ticker" aria-label="Status do servidor FiveM">
+    <div class="container ticker-flex">
+      <div class="ticker-left">
+        <span class="status-indicator online pulse"></span>
+        <span class="ticker-label">SERVIDOR FIVEM:</span>
+        <strong class="ticker-highlight">DISTRITO PAULISTA RP</strong>
+        <span class="tactical-tag">SÃO PAULO • V3.5</span>
+      </div>
+      <div class="ticker-right">
+        <span class="players-online"><b id="onlineCount">78</b>/<span id="maxClients">128</span> NA CIDADE</span>
+        <div class="ticker-actions-group">
+          <button class="btn-copy-ip" id="copyIpBtn" title="Copiar comando connect para o console F8" aria-label="Copiar IP do servidor">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span>F8: connect distritopaulistarp.fivebr.gg</span>
+          </button>
+          <a href="fivem://connect/distritopaulistarp.fivebr.gg" class="btn-connect-fivem" title="Disparar FiveM e conectar agora">
+            <span>⚡ ENTRAR NA CIDADE</span>
+          </a>
+          <button class="sound-toggle-btn" id="soundToggleBtn" title="Alternar efeitos sonoros de interface" aria-label="Alternar som">
+            <span id="soundIcon">🔊</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Header de Navegação -->
+  <header class="site-header" id="topo">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html" aria-label="Distrito Paulista - Página Inicial">
+        <img src="./assets/logo.png" alt="Distrito Paulista Logo" class="brand-logo" width="170" height="85" />
+      </a>
+
+      <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="Abrir menu de navegação">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <nav id="mainNav" class="main-nav" aria-label="Navegação principal">
+        <div class="nav-links-group">
+          <a href="index.html" class="nav-link active">Início</a>
+          <a href="#historia" class="nav-link">Nossa História</a>
+          <a href="regras.html" class="nav-link">Regras & Leis</a>
+          <a href="recrutamento.html" class="nav-link">Recrutamento Staff</a>
+          <a href="consultar-inscricao.html" class="nav-link">Consultar Inscrição</a>
+        </div>
+        <div class="nav-actions-group">
+          <a href="https://distritopaulista.centralcart.ai/" target="_blank" rel="noopener noreferrer" class="nav-vip-link" title="Acesse a Loja VIP Oficial">
+            <span>💎 Loja VIP</span>
+          </a>
+          <div class="nav-auth-slot" id="navAuthSlot">
+            <a href="login-staff.html" class="btn btn-outline-gold btn-staff-login-nav" id="navLoginBtn" title="Acesso restrito para membros da Staff">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Login Staff</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <!-- 3. Hero Section Estilo FiveM Realista -->
+    <section class="hero-paulista" id="home" aria-labelledby="heroTitle">
+      <div class="hero-backdrop" style="background-image: url('./assets/skyline_banner.jpg');"></div>
+      <div class="hero-noise-overlay"></div>
+      <div class="hero-vignette"></div>
+
+      <div class="container hero-inner">
+        <div class="hero-logo-wrapper">
+          <img src="./assets/logo.png" alt="Distrito Paulista RP" class="hero-emblem-3d" />
+        </div>
+
+        <h1 id="heroTitle" class="hero-headline">
+          O ROLEPLAY QUE SÃO PAULO MERECIA
+        </h1>
+
+        <p class="hero-pitch">
+          A maior experiência de interpretação urbana do Brasil. Uma economia realista, corporações policiais estruturadas, submundo do crime ativo e a Staff mais organizada do FiveM.
+        </p>
+
+        <!-- Console F8 Interativo estilo FiveM Real -->
+        <div class="f8-console-widget" aria-label="Console de conexão do FiveM">
+          <div class="f8-console-header">
+            <div class="f8-console-dots">
+              <span class="f8-dot red"></span>
+              <span class="f8-dot yellow"></span>
+              <span class="f8-dot green"></span>
+            </div>
+            <span class="f8-console-title">F8 CONSOLE // FIVEM CLIENT</span>
+            <span class="f8-status-ping">18ms • BRASIL</span>
+          </div>
+          <div class="f8-console-body">
+            <div class="f8-line muted">&gt; FiveM CitizenFX Core initialized...</div>
+            <div class="f8-line muted">&gt; Checking server integrity: DPGuard Anti-Cheat [ONLINE]</div>
+            <div class="f8-line active">
+              <span class="f8-prompt">&gt;</span>
+              <code id="f8CommandText">connect distritopaulistarp.fivebr.gg</code>
+              <button class="f8-copy-btn btn-copy-ip" title="Copiar para a área de transferência">Copiar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões de Ação do Hero -->
+        <div class="hero-actions">
+          <a href="regras.html" class="btn btn-gold" title="Manual de Regras e Código Penal">
+            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Manual de Regras</span>
+          </a>
+
+          <a href="recrutamento.html" class="btn btn-glass" title="Formulário de Recrutamento Staff">
+            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            <span>Recrutamento Staff</span>
+          </a>
+
+          <a href="https://distritopaulista.centralcart.ai/" target="_blank" rel="noopener noreferrer" class="btn btn-gold btn-gold-vip" title="Loja VIP Oficial">
+            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span>LOJA OFICIAL VIP</span>
+          </a>
+
+          <a href="https://discord.gg/dprp" target="_blank" rel="noopener noreferrer" class="btn btn-discord" title="Entrar no Discord Oficial">
+            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            <span>Discord Oficial</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Seção Nossa História (Lore Autêntica) -->
+    <section class="section-origin" id="historia" aria-labelledby="originTitle">
+      <div class="container">
+        <div class="origin-wrapper">
+          <div class="origin-text-col">
+            <span class="tactical-label">ORIGEM DO PROJETO</span>
+            <h2 id="originTitle">POR QUE CRIAMOS O DISTRITO PAULISTA?</h2>
+            <div class="origin-paragraphs" id="historyTextCol">
+              <p>
+                O Distrito Paulista nasceu da união de um grupo de amigos que estava cansado de passar por diferentes cidades de RP e encontrar sempre os mesmos problemas: abuso de poder na staff, suporte ruim e uma gestão autoritária, que não valorizava o tempo e a dedicação de cada jogador.
+              </p>
+              <p>
+                Foi dessa insatisfação que surgiu a vontade de construir uma cidade com respeito, diálogo e compromisso com a comunidade. Um lugar onde os jogadores fossem ouvidos e cada história tivesse espaço para acontecer.
+              </p>
+              <p>
+                Nossa proposta é o Medium RP, com foco em interpretação, imersão e responsabilidade. Queremos histórias bem construídas, mas também uma experiência acolhedora e divertida.
+              </p>
+              <p class="origin-highlight">
+                Aqui, seu tempo tem valor, sua opinião tem espaço e sua história faz parte da nossa.
+              </p>
+            </div>
+            <div class="origin-actions">
+              <a href="regras.html" class="btn btn-gold">
+                <span>Ler Regulamento Oficial</span>
+              </a>
+              <a href="recrutamento.html" class="btn btn-glass">
+                <span>Inscrever-se para a Staff</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="origin-media-col">
+            <div class="origin-frame">
+              <img src="./assets/historia.png" alt="História do Distrito Paulista RP" loading="lazy" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Barra de Informações da Cidade (Sem Clichê de Estatísticas Falsas) -->
+    <section class="city-status-bar" aria-label="Indicadores operacionais">
+      <div class="container">
+        <div class="city-status-grid">
+          <div class="status-pill-box">
+            <div class="status-pill-icon">📍</div>
+            <div>
+              <strong>SÃO PAULO 100% PERSONALIZADA</strong>
+              <p>Ruas, pontes e viadutos ambientados na capital paulista.</p>
+            </div>
+          </div>
+
+          <div class="status-pill-box">
+            <div class="status-pill-icon">💰</div>
+            <div>
+              <strong>ECONOMIA BALANCEADA</strong>
+              <p>Sem inflação absurda. Seu dinheiro e patrimônio têm valor real.</p>
+            </div>
+          </div>
+
+          <div class="status-pill-box">
+            <div class="status-pill-icon">🛡️</div>
+            <div>
+              <strong>PROTEÇÃO DPGUARD ATIVA</strong>
+              <p>Anti-cheat próprio bloqueando injetores, mod menus e crashers.</p>
+            </div>
+          </div>
+
+          <div class="status-pill-box">
+            <div class="status-pill-icon">🚀</div>
+            <div>
+              <strong>120 FPS SEM QUEDAS</strong>
+              <p>Otimização minuciosa de scripts para PC fraco e forte.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. O Mapa do Poder: Facções & Forças de SP (Seletor Interativo) -->
+    <section class="section-factions" id="faccoes" aria-labelledby="factionsTitle">
+      <div class="container">
+        <div class="section-header-left">
+          <span class="tactical-label">ESTRUTURA DA CIDADE</span>
+          <h2 id="factionsTitle">ESCOLHA SEU LADO EM SÃO PAULO</h2>
+          <p class="section-desc">
+            Cada corporação e organização no Distrito Paulista possui regimento próprio, cadeia de comando e procedimentos de Roleplay realistas.
+          </p>
+        </div>
+
+        <!-- Seletor de Categorias -->
+        <div class="factions-tabs-nav" role="tablist">
+          <button class="faction-tab-btn active" data-faction="pmesp" role="tab" aria-selected="true">
+            <img src="./assets/pmesp.png" alt="PMESP" class="faction-tab-img-icon" />
+            <span>PMESP</span>
+          </button>
+          <button class="faction-tab-btn" data-faction="civil" role="tab" aria-selected="false">
+            <img src="./assets/civil.png" alt="Polícia Civil" class="faction-tab-img-icon civil-tab-icon" />
+            <span>POLÍCIA CIVIL</span>
+          </button>
+          <button class="faction-tab-btn" data-faction="prf" role="tab" aria-selected="false">
+            <img src="./assets/prf.png" alt="PRF" class="faction-tab-img-icon prf-tab-icon" />
+            <span>PRF</span>
+          </button>
+          <button class="faction-tab-btn" data-faction="ilegal" role="tab" aria-selected="false">
+            <span class="faction-tab-icon">💀</span>
+            <span>O ILEGAL & FACÇÕES</span>
+          </button>
+          <button class="faction-tab-btn" data-faction="samu" role="tab" aria-selected="false">
+            <span class="faction-tab-icon">🚑</span>
+            <span>HOSPITAL & SAMU 192</span>
+          </button>
+          <button class="faction-tab-btn" data-faction="mecanica" role="tab" aria-selected="false">
+            <span class="faction-tab-icon">🔧</span>
+            <span>MECÂNICAS & RUA</span>
+          </button>
+        </div>
+
+        <!-- Cards das Facções / Corporações -->
+        <div class="faction-display-stage" id="factionStage">
+          <!-- O conteúdo é hidratado e alternado interativamente -->
+          <div class="faction-feature-card pmesp active" id="factionPmesp">
+            <div class="faction-card-header">
+              <div>
+                <span class="faction-tag pmesp-tag">SEGURANÇA PÚBLICA • GOVERNO DO ESTADO</span>
+                <h3>Polícia Militar do Estado de São Paulo</h3>
+                <p>Patrulhamento ostensivo, Força Tática, ROTA, ROCAM e RPM com procedimentos operacionais reais da corporação.</p>
+              </div>
+              <div class="faction-badge-seal pmesp-badge-seal">
+                <img src="./assets/pmesp.png" alt="Brasão PMESP" class="faction-seal-emblem" />
+                <span>PMESP</span>
+              </div>
+            </div>
+            <div class="faction-grid-columns">
+              <div class="faction-info-block">
+                <h4>Diretrizes Operacionais:</h4>
+                <ul>
+                  <li><strong>Uso Progressivo da Força:</strong> Verbalização primeiro, armamento proporcional e respeito ao Fair Play.</li>
+                  <li><strong>Batalhões & Modalidades:</strong> Radiopatrulha (RPM), Força Tática, ROCAM (motos), Águia e Pelotões de Choque/ROTA.</li>
+                  <li><strong>Sem Abuso de Mecânica:</strong> Proibido uso indiscriminado de spikes e batidas desleais durante perseguições.</li>
+                </ul>
+              </div>
+              <div class="faction-info-block">
+                <h4>Requisitos para Ingressar:</h4>
+                <ul>
+                  <li>Conhecimento pleno do Código Penal SP e conduta de respeito.</li>
+                  <li>Patrulhamento obrigatório em dupla (proibido patrulhar sozinho).</li>
+                  <li>Alistamento oficial divulgado no Discord da PMESP.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="faction-feature-card civil hidden" id="factionCivil">
+            <div class="faction-card-header">
+              <div>
+                <span class="faction-tag civil-tag">POLÍCIA JUDICIÁRIA & INVESTIGAÇÃO</span>
+                <h3>Polícia Civil do Estado de São Paulo</h3>
+                <p>DEIC, GARRA e equipes de inteligência focadas em investigação de facções, mandados judiciais e perícia criminal.</p>
+              </div>
+              <div class="faction-badge-seal civil-badge-seal">
+                <img src="./assets/civil.png" alt="Brasão Polícia Civil" class="faction-seal-emblem" />
+                <span>PCESP</span>
+              </div>
+            </div>
+            <div class="faction-grid-columns">
+              <div class="faction-info-block">
+                <h4>Atribuições Principais:</h4>
+                <ul>
+                  <li><strong>Inquéritos de Crime Organizado:</strong> Coleta de provas fotográficas, clipes e escutas autorizadas.</li>
+                  <li><strong>Viaturas Descaracterizadas:</strong> Operações veladas de infiltração mediante autorização do comando.</li>
+                  <li><strong>Cumprimento de Mandados:</strong> Busca e apreensão em conjunto com a autoridade judicial.</li>
+                </ul>
+              </div>
+              <div class="faction-info-block">
+                <h4>Regras de Conduta:</h4>
+                <ul>
+                  <li>Tolerância zero com corrupção policial sem construção sólida de RP.</li>
+                  <li>Lavratura de Boletins de Ocorrência na Delegacia Central.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="faction-feature-card prf hidden" id="factionPrf">
+            <div class="faction-card-header">
+              <div>
+                <span class="faction-tag prf-tag">POLÍCIA DA UNIÃO • PATRULHAMENTO RODOVIÁRIO</span>
+                <h3>Polícia Rodoviária Federal (PRF)</h3>
+                <p>Fiscalização de rodovias estaduais e federais, combate ao contrabando de armas e drogas, interceptações em alta velocidade e apoio com o NOE (Núcleo de Operações Especiais).</p>
+              </div>
+              <div class="faction-badge-seal prf-badge-seal">
+                <img src="./assets/prf.png" alt="Brasão PRF" class="faction-seal-emblem" />
+                <span>PRF</span>
+              </div>
+            </div>
+            <div class="faction-grid-columns">
+              <div class="faction-info-block">
+                <h4>Diretrizes Operacionais:</h4>
+                <ul>
+                  <li><strong>Controle de Vias & Perseguições:</strong> Monitoramento de rodovias, bloqueios estratégicos e acompanhamentos de alta velocidade com Fair Play.</li>
+                  <li><strong>Combate ao Tráfico Interestadual:</strong> Fiscalização de cargas pesadas, veículos suspeitos e apreensão de armamentos em trânsito.</li>
+                  <li><strong>NOE (Operações Especiais):</strong> Táticas de intervenção rápida em ocorrências de alto risco e apoio às forças de segurança.</li>
+                </ul>
+              </div>
+              <div class="faction-info-block">
+                <h4>Requisitos para Ingressar:</h4>
+                <ul>
+                  <li>Domínio de pilotagem defensiva e táticas de cerco rodoviário.</li>
+                  <li>Comunicação via rádio padronizada e alinhamento com a PMESP e PCESP.</li>
+                  <li>Alistamento e processo seletivo divulgados no Discord oficial da PRF.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="faction-feature-card ilegal hidden" id="factionIlegal">
+            <div class="faction-card-header">
+              <div>
+                <span class="faction-tag ilegal-tag">SUBMUNDO • CÚPULA DO CRIME</span>
+                <h3>Facções, Tráfico & Assaltos</h3>
+                <p>Disputa de territórios de favela, venda de drogas, tráfico de armamento pesado e ações de grande porte.</p>
+              </div>
+              <div class="faction-badge-seal">ILEGAL</div>
+            </div>
+            <div class="faction-grid-columns">
+              <div class="faction-info-block">
+                <h4>Regulamento de Ações:</h4>
+                <ul>
+                  <li><strong>Negociação Real com Refém:</strong> A vida do refém é sempre prioridade absoluta para a liberação de fuga.</li>
+                  <li><strong>Limite de Ações Grandes:</strong> Máximo de 1 ação grande por semana por facção (Banco Central, Nióbio, Joalheria).</li>
+                  <li><strong>Saidinha Bancária e Rua:</strong> Assaltos a jogadores na rua permitidos apenas das 20h às 06h (limite de 10%).</li>
+                </ul>
+              </div>
+              <div class="faction-info-block">
+                <h4>Hierarquia & Cúpula:</h4>
+                <ul>
+                  <li>Somente membros registrados no painel oficial podem defender território e favela.</li>
+                  <li>Proibido fazer Cop Baiting (atrair ou matar policiais sem motivo de RP).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="faction-feature-card samu hidden" id="factionSamu">
+            <div class="faction-card-header">
+              <div>
+                <span class="faction-tag samu-tag">SAÚDE • NEUTRALIDADE TOTAL</span>
+                <h3>Hospital Albert Einstein & SAMU 192</h3>
+                <p>Equipe médica neutra prestando atendimento a civis, policiais e criminosos em serviço 24 horas.</p>
+              </div>
+              <div class="faction-badge-seal">SAMU</div>
+            </div>
+            <div class="faction-grid-columns">
+              <div class="faction-info-block">
+                <h4>Princípios da Medicina:</h4>
+                <ul>
+                  <li><strong>Neutralidade Inegociável:</strong> Profissionais em serviço não escolhem lados nem participam de crimes.</li>
+                  <li><strong>Imunidade Operacional:</strong> Proibido sequestrar, roubar ou agredir médicos em serviço com viatura caracterizada.</li>
+                  <li><strong>Atendimento Pós-Ação:</strong> Entrada no perímetro autorizada após o cessar-fogo oficial das forças de segurança.</li>
+                </ul>
+              </div>
+              <div class="faction-info-block">
+                <h4>Recursos Médicos:</h4>
+                <ul>
+                  <li>UTIs Móveis, viaturas de resgate rápido e resgate aeromédico de helicóptero.</li>
+                  <li>Encaminhamento cirúrgico e emissão de atestados de integridade.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="faction-feature-card mecanica hidden" id="factionMecanica">
+            <div class="faction-card-header">
+              <div>
+                <span class="faction-tag mecanica-tag">OFICINAS • CULTURA AUTOMOTIVA</span>
+                <h3>Mecânicas Oficiais & Cena Urbana</h3>
+                <p>Preparações de motor, funilaria, suspensão a ar, pinturas customizadas e os maiores encontros da capital.</p>
+              </div>
+              <div class="faction-badge-seal">OFICINAS</div>
+            </div>
+            <div class="faction-grid-columns">
+              <div class="faction-info-block">
+                <h4>Serviços Disponíveis:</h4>
+                <ul>
+                  <li><strong>Customização Completa:</strong> Estética de viaturas oficiais e carros particulares com peças exclusivas.</li>
+                  <li><strong>Área Segura (Safezone):</strong> Pátio da oficina com proibição total de início de conflitos armados.</li>
+                  <li><strong>Guincho & Socorro Mecânico:</strong> Atendimento nas rodovias e avenidas em caso de panes ou acidentes.</li>
+                </ul>
+              </div>
+              <div class="faction-info-block">
+                <h4>Vida Noturna & Eventos:</h4>
+                <ul>
+                  <li>Pistas de arrancada regulamentadas pela prefeitura e encontros de som automotivo.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Gameplay Cinematográfico com o Ativo Oficial gameplay_bg.png -->
+    <section class="cinematic-showcase">
+      <div class="cinematic-frame">
+        <div class="cinematic-bg" style="background-image: url('./assets/gameplay_bg.png');"></div>
+        <div class="cinematic-darkener"></div>
+        <div class="container cinematic-content">
+          <span class="tactical-tag">SÃO PAULO À NOITE</span>
+          <h2>DA PERIFERIA AOS BAIRROS NOBRES</h2>
+          <p>
+            O Distrito Paulista foi desenhado com foco na experiência visual: sem texturas estouradas, sem menus poluídos e com um HUD minimalista para manter sua imersão em 100%.
+          </p>
+          <div class="cinematic-btn-row">
+            <a href="fivem://connect/distritopaulistarp.fivebr.gg" class="btn btn-gold btn-connect-fivem">
+              <span>Entrar no Servidor Agora</span>
+            </a>
+            <a href="https://discord.gg/dprp" target="_blank" rel="noopener noreferrer" class="btn btn-glass">
+              <span>Acessar Discord da Comunidade</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Comandos Essenciais do Jogador (Manual de Teclas) -->
+    <section class="section-commands" id="comandos" aria-labelledby="commandsTitle">
+      <div class="container">
+        <div class="section-header-center">
+          <span class="tactical-label">GUIA DE SOBREVIVÊNCIA</span>
+          <h2 id="commandsTitle">TECLAS & COMANDOS ESSENCIAIS</h2>
+          <p class="section-desc">
+            Decore os comandos básicos para não ficar perdido no seu primeiro dia na cidade.
+          </p>
+        </div>
+
+        <div class="keybinds-grid">
+          <div class="keybind-card">
+            <div class="keycap">K</div>
+            <div>
+              <strong>Abrir Smartphone</strong>
+              <p>Contatos, transferências bancárias, chamados do SAMU e táxi.</p>
+            </div>
+          </div>
+
+          <div class="keybind-card">
+            <div class="keycap">&quot;</div>
+            <div>
+              <strong>Abrir Inventário</strong>
+              <p>Mochila, bolsos, itens rápidos e uso de equipamentos.</p>
+            </div>
+          </div>
+
+          <div class="keybind-card">
+            <div class="keycap">F11</div>
+            <div>
+              <strong>Menu de Animações (Emotes)</strong>
+              <p>Centenas de poses, danças e interações corporais de RP.</p>
+            </div>
+          </div>
+
+          <div class="keybind-card">
+            <div class="keycap">G</div>
+            <div>
+              <strong>Cinto de Segurança</strong>
+              <p>Evita ejeção do para-brisa em colisões de alta velocidade.</p>
+            </div>
+          </div>
+
+          <div class="keybind-card">
+            <div class="keycap">L</div>
+            <div>
+              <strong>Trancar / Destrancar Veículo</strong>
+              <p>Alarme e travas do carro próprio ou viatura autorizada.</p>
+            </div>
+          </div>
+
+          <div class="keybind-card">
+            <div class="keycap">F8</div>
+            <div>
+              <strong>Console de Conexão</strong>
+              <p>Para comandos de conexão, reset de voz e diagnóstico.</p>
+            </div>
+          </div>
+
+          <div class="keybind-card">
+            <div class="keycap">B</div>
+            <div>
+              <strong>Apontar o Dedo</strong>
+              <p>Gesto corporal para indicar locais e direcionar atenção.</p>
+            </div>
+          </div>
+
+          <div class="keybind-card">
+            <div class="keycap">CAPS</div>
+            <div>
+              <strong>Rádio Operacional</strong>
+              <p>Modulação de frequência para corporações e equipes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 9. Rodapé Oficial -->
+  <footer class="site-footer">
+    <div class="container footer-content-wrap">
+      <div class="footer-col-brand">
+        <img src="./assets/logo.png" alt="Distrito Paulista Logo" class="footer-logo" width="160" />
+        <p class="footer-desc">
+          O Distrito Paulista é um servidor FiveM focado em roleplay urbano imersivo em São Paulo, com respeito mútuo, jogabilidade equilibrada e gestão transparente.
+        </p>
+        <div class="footer-badges">
+          <span class="footer-pill">🛡️ Anti-Cheat DPGuard</span>
+          <span class="footer-pill">⚡ 120 FPS Estável</span>
+          <span class="footer-pill">⚖️ Medium RP</span>
+        </div>
+      </div>
+
+      <div class="footer-col-links">
+        <strong>Navegação da Cidade</strong>
+        <ul>
+          <li><a href="index.html">Página Inicial</a></li>
+          <li><a href="#faccoes">Facções & PMESP</a></li>
+          <li><a href="#comandos">Guia de Comandos</a></li>
+          <li><a href="regras.html?cat=gerais">Regras Gerais da Cidade</a></li>
+          <li><a href="regras.html?cat=policia">Regulamento da Polícia</a></li>
+          <li><a href="regras.html?cat=ilegal">Manual do Ilegal</a></li>
+          <li><a href="regras.html?cat=codigo_penal">Código Penal Unificado</a></li>
+          <li><a href="https://distritopaulista.centralcart.ai/" target="_blank" rel="noopener noreferrer" style="color: var(--gold-vivid); font-weight: 700;">💎 Loja VIP Oficial</a></li>
+          <li><a href="recrutamento.html">Recrutamento para Staff</a></li>
+          <li><a href="consultar-inscricao.html">Consultar Minha Inscrição</a></li>
+          <li><a href="login-staff.html">Acesso à Staff (Painel)</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom-bar">
+      <div class="container footer-bottom-flex">
+        <p>© <span id="year"></span> Distrito Paulista RP. Todos os direitos reservados. Não afiliado à Take-Two Interactive ou Rockstar Games.</p>
+        <div class="footer-social-icons">
+          <a href="https://discord.gg/dprp" target="_blank" rel="noopener noreferrer" aria-label="Discord Oficial">Discord Oficial</a> •
+          <a href="https://distritopaulista.centralcart.ai/" target="_blank" rel="noopener noreferrer" aria-label="Loja VIP Oficial">Loja VIP</a> •
+          <a href="#topo">Voltar ao topo ↑</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notificações Flutuantes -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Script Modular da Aplicação -->
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
