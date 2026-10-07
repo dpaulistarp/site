@@ -1338,6 +1338,20 @@ function checkInitialAuth() {
 /* ==========================================================================
    SINCRONIZAÇÃO GERAL COM SUPABASE CLOUD
    ========================================================================== */
+function loadStateFromStorage() {
+  try {
+    const savedRules = localStorage.getItem("dp_rules");
+    if (savedRules) {
+      const parsed = JSON.parse(savedRules);
+      if (parsed && typeof parsed === "object") {
+        Object.assign(state.rules, parsed);
+      }
+    }
+  } catch (e) {
+    console.warn("Storage load:", e);
+  }
+}
+
 async function syncWithSupabase() {
   if (!supabase) return;
 
@@ -1346,20 +1360,13 @@ async function syncWithSupabase() {
     const { data: rulesData, error: rulesErr } = await supabase.from("rules").select("*");
     if (!rulesErr && rulesData && rulesData.length > 0) {
       rulesData.forEach(row => {
-        // Ignora dados mock legados antigos da nuvem (exige que contenha marcadores das regras oficiais completas)
-        const isOfficialNew =
-          (row.category === "gerais" && row.content.includes("PRINCÍPIOS DA CIDADE")) ||
-          (row.category === "policia" && row.content.includes("REGRAS GERAIS DA POLÍCIA")) ||
-          (row.category === "ilegal" && row.content.includes("ORGANIZAÇÕES ILEGAIS")) ||
-          (row.category === "codigo_penal" && row.content.includes("Alta Velocidade")) ||
-          (row.category === "historia" && row.content.includes("Distrito Paulista nasceu"));
-
-        if (state.rules[row.category] && row.content && isOfficialNew) {
+        if (row.category && row.title && row.content) {
           state.rules[row.category] = { title: row.title, content: row.content };
         }
       });
       if ($("#rulesContent")) renderRules(state.currentRuleTab);
       updateRuleCounts();
+      renderDynamicSections();
     }
 
     // 2. Checar sessão autenticada real
@@ -1386,7 +1393,7 @@ async function syncWithSupabase() {
 }
 
 /* ==========================================================================
-   INICIALIZAÇÃO DO SISTEMA
+   RENDERIZAÇÃO DINÂMICA DE SEÇÕES PUBLICADAS (INDEX.HTML & HOME)
    ========================================================================== */
 function renderDynamicHistory() {
   const container = $("#historyTextCol");
@@ -1407,6 +1414,154 @@ function renderDynamicHistory() {
   }
 }
 
+function renderDynamicFactions() {
+  const data = state.rules.estrutura_cidade;
+  if (!data || !data.content) return;
+
+  const lines = data.content.split("\n").map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return;
+
+  const descEl = $("#factionsSectionDesc");
+  const introLines = [];
+
+  lines.forEach(line => {
+    const lower = line.toLowerCase();
+    if (lower.startsWith("pmesp") || lower.includes("polícia militar") || lower.includes("policia militar")) {
+      const desc = line.replace(/^pmesp(\s*\(.*?\))?:\s*/i, "").trim();
+      const el = $("#descFactionPmesp");
+      if (el && desc) el.textContent = desc;
+    } else if (lower.startsWith("polícia civil") || lower.startsWith("policia civil") || lower.startsWith("pcesp")) {
+      const desc = line.replace(/^(polícia civil|policia civil|pcesp)(\s*\(.*?\))?:\s*/i, "").trim();
+      const el = $("#descFactionCivil");
+      if (el && desc) el.textContent = desc;
+    } else if (lower.startsWith("prf") || lower.includes("polícia rodoviária") || lower.includes("policia rodoviaria")) {
+      const desc = line.replace(/^prf(\s*\(.*?\))?:\s*/i, "").trim();
+      const el = $("#descFactionPrf");
+      if (el && desc) el.textContent = desc;
+    } else if (lower.startsWith("o ilegal") || lower.startsWith("ilegal") || lower.startsWith("facções") || lower.startsWith("faccoes")) {
+      const desc = line.replace(/^(o ilegal & facções|o ilegal|ilegal & facções|ilegal|facções|faccoes)(\s*\(.*?\))?:\s*/i, "").trim();
+      const el = $("#descFactionIlegal");
+      if (el && desc) el.textContent = desc;
+    } else if (lower.startsWith("hospital") || lower.startsWith("samu")) {
+      const desc = line.replace(/^(hospital & samu 192|hospital & samu|hospital|samu 192|samu)(\s*\(.*?\))?:\s*/i, "").trim();
+      const el = $("#descFactionSamu");
+      if (el && desc) el.textContent = desc;
+    } else if (lower.startsWith("mecânicas") || lower.startsWith("mecanicas") || lower.startsWith("oficinas")) {
+      const desc = line.replace(/^(mecânicas & cultura de rua|mecanicas & cultura de rua|mecânicas & rua|mecanicas & rua|mecânicas|mecanicas|oficinas)(\s*\(.*?\))?:\s*/i, "").trim();
+      const el = $("#descFactionMecanica");
+      if (el && desc) el.textContent = desc;
+    } else if (!lower.startsWith("estrutura das")) {
+      introLines.push(line);
+    }
+  });
+
+  if (descEl && introLines.length > 0) {
+    descEl.textContent = introLines.join(" ");
+  }
+}
+
+function renderDynamicCinematic() {
+  const data = state.rules.sp_noite;
+  if (!data || !data.content) return;
+
+  const lines = data.content.split("\n").map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return;
+
+  const tagEl = $("#cinematicTag");
+  const titleEl = $("#cinematicTitle");
+  const paragraphsEl = $("#cinematicParagraphs");
+  const sectionTextEl = $("#cinematicSectionText");
+
+  if (tagEl && data.title) {
+    tagEl.textContent = data.title.split("—")[0].trim().toUpperCase() || "SÃO PAULO À NOITE";
+  }
+
+  let startIndex = 0;
+  if (lines[0] && lines[0].length < 60 && titleEl) {
+    titleEl.textContent = lines[0];
+    startIndex = 1;
+  }
+
+  const pLines = lines.slice(startIndex);
+  if (pLines.length > 0) {
+    if (paragraphsEl) {
+      paragraphsEl.innerHTML = pLines.map(p => `<p>${escapeHtml(p)}</p>`).join("");
+    } else if (sectionTextEl) {
+      sectionTextEl.textContent = pLines.join(" ");
+    }
+  }
+}
+
+function renderDynamicKeybinds() {
+  const data = state.rules.guia_sobrevivencia;
+  const grid = $("#keybindsGrid");
+  if (!data || !data.content || !grid) return;
+
+  const lines = data.content.split("\n").map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return;
+
+  const titleEl = $("#commandsTitle");
+  if (titleEl && data.title) {
+    const parts = data.title.split("—");
+    if (parts.length > 1) {
+      titleEl.textContent = parts[1].trim().toUpperCase();
+    }
+  }
+
+  const cardsHtml = lines.map(line => {
+    // Formato: Tecla | Título | Descrição
+    if (line.includes("|")) {
+      const parts = line.split("|").map(p => p.trim());
+      const keycap = parts[0] || "•";
+      const title = parts[1] || "";
+      const desc = parts.slice(2).join(" | ") || "";
+      return `
+        <div class="keybind-card">
+          <div class="keycap">${escapeHtml(keycap)}</div>
+          <div>
+            <strong>${escapeHtml(title)}</strong>
+            ${desc ? `<p>${escapeHtml(desc)}</p>` : ""}
+          </div>
+        </div>
+      `;
+    }
+    // Formato com traço: Tecla - Descrição
+    if (line.includes(" - ")) {
+      const [keycap, ...rest] = line.split(" - ").map(p => p.trim());
+      return `
+        <div class="keybind-card">
+          <div class="keycap">${escapeHtml(keycap)}</div>
+          <div>
+            <strong>${escapeHtml(rest.join(" - "))}</strong>
+          </div>
+        </div>
+      `;
+    }
+    return `
+      <div class="keybind-card">
+        <div class="keycap">⌨️</div>
+        <div>
+          <strong>${escapeHtml(line)}</strong>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  if (cardsHtml) {
+    grid.innerHTML = cardsHtml;
+  }
+}
+
+function renderDynamicSections() {
+  renderDynamicHistory();
+  renderDynamicFactions();
+  renderDynamicCinematic();
+  renderDynamicKeybinds();
+}
+
+/* ==========================================================================
+   INICIALIZAÇÃO DO SISTEMA
+   ========================================================================== */
 async function init() {
   const yearEl = $("#year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -1420,7 +1575,17 @@ async function init() {
   checkInitialAuth();
   setupNavigation();
   setupFactionTabs();
-  renderDynamicHistory();
+  renderDynamicSections();
+
+  // Ouvir alterações de regras e publicações entre abas
+  window.addEventListener("storage", (e) => {
+    if (e.key === "dp_rules") {
+      loadStateFromStorage();
+      renderDynamicSections();
+      if ($("#rulesContent")) renderRules(state.currentRuleTab);
+      updateRuleCounts();
+    }
+  });
 
   // Inicializar módulos de acordo com os elementos existentes na página
   setupRulesEvents();

@@ -235,7 +235,7 @@
         <div class="section-header-left">
           <span class="tactical-label">ESTRUTURA DA CIDADE</span>
           <h2 id="factionsTitle">ESCOLHA SEU LADO EM SÃO PAULO</h2>
-          <p class="section-desc">
+          <p class="section-desc" id="factionsSectionDesc">
             Cada corporação e organização no Distrito Paulista possui regimento próprio, cadeia de comando e procedimentos de Roleplay realistas.
           </p>
         </div>
@@ -276,7 +276,7 @@
               <div>
                 <span class="faction-tag pmesp-tag">SEGURANÇA PÚBLICA • GOVERNO DO ESTADO</span>
                 <h3>Polícia Militar do Estado de São Paulo</h3>
-                <p>Patrulhamento ostensivo, Força Tática, ROTA, ROCAM e RPM com procedimentos operacionais reais da corporação.</p>
+                <p id="descFactionPmesp">Patrulhamento ostensivo, Força Tática, ROTA, ROCAM e RPM com procedimentos operacionais reais da corporação.</p>
               </div>
               <div class="faction-badge-seal pmesp-badge-seal">
                 <img src="./assets/pmesp.png" alt="Brasão PMESP" class="faction-seal-emblem" />
@@ -308,7 +308,7 @@
               <div>
                 <span class="faction-tag civil-tag">POLÍCIA JUDICIÁRIA & INVESTIGAÇÃO</span>
                 <h3>Polícia Civil do Estado de São Paulo</h3>
-                <p>DEIC, GARRA e equipes de inteligência focadas em investigação de facções, mandados judiciais e perícia criminal.</p>
+                <p id="descFactionCivil">DEIC, GARRA e equipes de inteligência focadas em investigação de facções, mandados judiciais e perícia criminal.</p>
               </div>
               <div class="faction-badge-seal civil-badge-seal">
                 <img src="./assets/civil.png" alt="Brasão Polícia Civil" class="faction-seal-emblem" />
@@ -339,7 +339,7 @@
               <div>
                 <span class="faction-tag prf-tag">POLÍCIA DA UNIÃO • PATRULHAMENTO RODOVIÁRIO</span>
                 <h3>Polícia Rodoviária Federal (PRF)</h3>
-                <p>Fiscalização de rodovias estaduais e federais, combate ao contrabando de armas e drogas, interceptações em alta velocidade e apoio com o NOE (Núcleo de Operações Especiais).</p>
+                <p id="descFactionPrf">Fiscalização de rodovias estaduais e federais, combate ao contrabando de armas e drogas, interceptações em alta velocidade e apoio com o NOE (Núcleo de Operações Especiais).</p>
               </div>
               <div class="faction-badge-seal prf-badge-seal">
                 <img src="./assets/prf.png" alt="Brasão PRF" class="faction-seal-emblem" />
@@ -371,7 +371,7 @@
               <div>
                 <span class="faction-tag ilegal-tag">SUBMUNDO • CÚPULA DO CRIME</span>
                 <h3>Facções, Tráfico & Assaltos</h3>
-                <p>Disputa de territórios de favela, venda de drogas, tráfico de armamento pesado e ações de grande porte.</p>
+                <p id="descFactionIlegal">Disputa de territórios de favela, venda de drogas, tráfico de armamento pesado e ações de grande porte.</p>
               </div>
               <div class="faction-badge-seal">ILEGAL</div>
             </div>
@@ -399,7 +399,7 @@
               <div>
                 <span class="faction-tag samu-tag">SAÚDE • NEUTRALIDADE TOTAL</span>
                 <h3>Hospital Albert Einstein & SAMU 192</h3>
-                <p>Equipe médica neutra prestando atendimento a civis, policiais e criminosos em serviço 24 horas.</p>
+                <p id="descFactionSamu">Equipe médica neutra prestando atendimento a civis, policiais e criminosos em serviço 24 horas.</p>
               </div>
               <div class="faction-badge-seal">SAMU</div>
             </div>
@@ -427,7 +427,7 @@
               <div>
                 <span class="faction-tag mecanica-tag">OFICINAS • CULTURA AUTOMOTIVA</span>
                 <h3>Mecânicas Oficiais & Cena Urbana</h3>
-                <p>Preparações de motor, funilaria, suspensão a ar, pinturas customizadas e os maiores encontros da capital.</p>
+                <p id="descFactionMecanica">Preparações de motor, funilaria, suspensão a ar, pinturas customizadas e os maiores encontros da capital.</p>
               </div>
               <div class="faction-badge-seal">OFICINAS</div>
             </div>
@@ -458,11 +458,13 @@
         <div class="cinematic-bg" style="background-image: url('./assets/gameplay_bg.png');"></div>
         <div class="cinematic-darkener"></div>
         <div class="container cinematic-content">
-          <span class="tactical-tag">SÃO PAULO À NOITE</span>
-          <h2>DA PERIFERIA AOS BAIRROS NOBRES</h2>
-          <p>
-            O Distrito Paulista foi desenhado com foco na experiência visual: sem texturas estouradas, sem menus poluídos e com um HUD minimalista para manter sua imersão em 100%.
-          </p>
+          <span class="tactical-tag" id="cinematicTag">SÃO PAULO À NOITE</span>
+          <h2 id="cinematicTitle">DA PERIFERIA AOS BAIRROS NOBRES</h2>
+          <div class="cinematic-paragraphs" id="cinematicParagraphs">
+            <p id="cinematicSectionText">
+              O Distrito Paulista foi desenhado com foco na experiência visual: sem texturas estouradas, sem menus poluídos e com um HUD minimalista para manter sua imersão em 100%.
+            </p>
+          </div>
           <div class="cinematic-btn-row">
             <a href="fivem://connect/distritopaulistarp.fivebr.gg" class="btn btn-gold btn-connect-fivem">
               <span>Entrar no Servidor Agora</span>
@@ -481,12 +483,12 @@
         <div class="section-header-center">
           <span class="tactical-label">GUIA DE SOBREVIVÊNCIA</span>
           <h2 id="commandsTitle">TECLAS & COMANDOS ESSENCIAIS</h2>
-          <p class="section-desc">
+          <p class="section-desc" id="commandsSubtitle">
             Decore os comandos básicos para não ficar perdido no seu primeiro dia na cidade.
           </p>
         </div>
 
-        <div class="keybinds-grid">
+        <div class="keybinds-grid" id="keybindsGrid">
           <div class="keybind-card">
             <div class="keycap">K</div>
             <div>

@@ -40,7 +40,7 @@ create table if not exists public.permissions_matrix (
 
 -- 4. Tabela de Regras Oficiais da Cidade
 create table if not exists public.rules (
-  category text primary key check (category in ('gerais', 'policia', 'ilegal', 'codigo_penal', 'historia')),
+  category text primary key check (category in ('gerais', 'policia', 'ilegal', 'codigo_penal', 'historia', 'estrutura_cidade', 'sp_noite', 'guia_sobrevivencia')),
   title text not null check (char_length(title) between 1 and 120),
   content text not null check (char_length(content) between 1 and 25000),
   updated_at timestamptz not null default now(),
@@ -415,6 +415,40 @@ Capítulo 2: As Forças de Segurança Pública
 Com a criação do Comando Unificado das Forças de Segurança, os batalhões de elite da Polícia Militar e Civil foram equipados com tecnologia de ponta para patrulhar desde os bairros nobres até as comunidades da periferia, preservando a paz dos civis que movimentam a economia formal.
 Capítulo 3: A Era Atual e o Seu Papel
 Hoje, cada esquina do Distrito Paulista respira história. Seja na farda honrada da polícia, nos tribunais de justiça, nos leitos do hospital, nas garagens customizadas ou nas operações arriscadas do submundo, o seu destino é escrito a cada decisão. Bem-vindo à cidade que nunca dorme.'
+),
+(
+  'estrutura_cidade',
+  'Estrutura da Cidade — Facções & Forças de São Paulo',
+  'ESTRUTURA DAS ORGANIZAÇÕES E CORPORAÇÕES
+Cada corporação e organização no Distrito Paulista possui regimento próprio, cadeia de comando e procedimentos de Roleplay realistas.
+
+PMESP (Polícia Militar de SP): Patrulhamento ostensivo, Força Tática, ROTA, ROCAM e RPM com procedimentos operacionais reais da corporação.
+POLÍCIA CIVIL (PCESP): DEIC, GARRA e equipes de inteligência focadas em investigação de facções, mandados judiciais e perícia criminal.
+PRF (Polícia Rodoviária Federal): Fiscalização de rodovias estaduais e federais, combate ao contrabando de armas e drogas, interceptações em alta velocidade e apoio com o NOE.
+O ILEGAL & FACÇÕES: Disputa de territórios de favela, venda de drogas, tráfico de armamento pesado e ações de grande porte com regras rígidas de Fair Play.
+HOSPITAL & SAMU 192: Equipe médica neutra prestando atendimento a civis, policiais e criminosos em serviço 24 horas ininterruptas.
+MECÂNICAS & CULTURA DE RUA: Preparações de motor, funilaria, suspensão a ar, pinturas customizadas e os maiores encontros automotivos da capital.'
+),
+(
+  'sp_noite',
+  'São Paulo à Noite — Onde Ação e Roleplay se Encontram',
+  'DA PERIFERIA AOS BAIRROS NOBRES
+O Distrito Paulista foi desenhado com foco total na experiência visual e imersiva: sem texturas estouradas, sem menus poluídos e com um HUD minimalista para manter sua imersão em 100%.
+
+Das avenidas iluminadas aos becos das comunidades, cada esquina conta uma história de poder, lealdade e sobrevivência na maior metrópole do Brasil.
+Otimização impecável garantindo 120 FPS estáveis mesmo em confrontos e perseguições intensas.'
+),
+(
+  'guia_sobrevivencia',
+  'Guia de Sobrevivência — Teclas & Comandos Essenciais do Jogador',
+  'K | Abrir Smartphone | Contatos, transferências bancárias, chamados do SAMU e táxi.
+" | Abrir Inventário | Mochila, bolsos, itens rápidos e uso de equipamentos.
+F11 | Menu de Animações (Emotes) | Centenas de poses, danças e interações corporais de RP.
+G | Cinto de Segurança | Evita ejeção do para-brisa em colisões de alta velocidade.
+L | Trancar / Destrancar Veículo | Alarme e travas do carro próprio ou viatura autorizada.
+F8 | Console de Conexão | Para comandos de conexão, reset de voz e diagnóstico.
+B | Apontar o Dedo | Interação gestual para indicar direção e objetos.
+CAPS | Falar no Rádio / Walkie-Talkie | Comunicação de voz com frequência militar e facções.'
 )
 on conflict (category) do nothing;
 

@@ -283,6 +283,43 @@ export const DEFAULT_RULES = {
       "",
       "Sejam bem-vindos ao Distrito Paulista!"
     ].join("\n")
+  },
+  estrutura_cidade: {
+    title: "Estrutura da Cidade — Facções & Forças de São Paulo",
+    content: [
+      "ESTRUTURA DAS ORGANIZAÇÕES E CORPORAÇÕES",
+      "Cada corporação e organização no Distrito Paulista possui regimento próprio, cadeia de comando e procedimentos de Roleplay realistas.",
+      "",
+      "PMESP (Polícia Militar de SP): Patrulhamento ostensivo, Força Tática, ROTA, ROCAM e RPM com procedimentos operacionais reais da corporação.",
+      "POLÍCIA CIVIL (PCESP): DEIC, GARRA e equipes de inteligência focadas em investigação de facções, mandados judiciais e perícia criminal.",
+      "PRF (Polícia Rodoviária Federal): Fiscalização de rodovias estaduais e federais, combate ao contrabando de armas e drogas, interceptações em alta velocidade e apoio com o NOE.",
+      "O ILEGAL & FACÇÕES: Disputa de territórios de favela, venda de drogas, tráfico de armamento pesado e ações de grande porte com regras rígidas de Fair Play.",
+      "HOSPITAL & SAMU 192: Equipe médica neutra prestando atendimento a civis, policiais e criminosos em serviço 24 horas ininterruptas.",
+      "MECÂNICAS & CULTURA DE RUA: Preparações de motor, funilaria, suspensão a ar, pinturas customizadas e os maiores encontros automotivos da capital."
+    ].join("\n")
+  },
+  sp_noite: {
+    title: "São Paulo à Noite — Onde Ação e Roleplay se Encontram",
+    content: [
+      "DA PERIFERIA AOS BAIRROS NOBRES",
+      "O Distrito Paulista foi desenhado com foco total na experiência visual e imersiva: sem texturas estouradas, sem menus poluídos e com um HUD minimalista para manter sua imersão em 100%.",
+      "",
+      "Das avenidas iluminadas aos becos das comunidades, cada esquina conta uma história de poder, lealdade e sobrevivência na maior metrópole do Brasil.",
+      "Otimização impecável garantindo 120 FPS estáveis mesmo em confrontos e perseguições intensas."
+    ].join("\n")
+  },
+  guia_sobrevivencia: {
+    title: "Guia de Sobrevivência — Teclas & Comandos Essenciais do Jogador",
+    content: [
+      "K | Abrir Smartphone | Contatos, transferências bancárias, chamados do SAMU e táxi.",
+      "\" | Abrir Inventário | Mochila, bolsos, itens rápidos e uso de equipamentos.",
+      "F11 | Menu de Animações (Emotes) | Centenas de poses, danças e interações corporais de RP.",
+      "G | Cinto de Segurança | Evita ejeção do para-brisa em colisões de alta velocidade.",
+      "L | Trancar / Destrancar Veículo | Alarme e travas do carro próprio ou viatura autorizada.",
+      "F8 | Console de Conexão | Para comandos de conexão, reset de voz e diagnóstico.",
+      "B | Apontar o Dedo | Interação gestual para indicar direção e objetos.",
+      "CAPS | Falar no Rádio / Walkie-Talkie | Comunicação de voz com frequência militar e facções."
+    ].join("\n")
   }
 };
 
