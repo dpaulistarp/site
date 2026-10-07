@@ -302,8 +302,12 @@ function setupNavigation() {
     }
   });
 
-  // 4. Polling seguro de jogadores online
+  // 4. Polling dinâmico em tempo real de jogadores online
   updateOnlinePlayers();
+  if (!window._dpPlayerPollStarted) {
+    window._dpPlayerPollStarted = true;
+    setInterval(updateOnlinePlayers, 10000);
+  }
 }
 
 async function updateOnlinePlayers() {
@@ -311,20 +315,48 @@ async function updateOnlinePlayers() {
   const maxClientsEl = $("#maxClients");
   if (!onlineCountEl) return;
 
-  try {
-    const res = await fetch("/api/fivem-status", { cache: "no-store" });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && typeof data.clients === "number") {
-        onlineCountEl.textContent = data.clients;
-        if (maxClientsEl && data.maxClients) maxClientsEl.textContent = data.maxClients;
-        return;
+  const endpoints = [
+    "/api/fivem-status",
+    "http://distritopaulistarp.fivebr.gg:30120/dynamic.json",
+    "http://188.220.168.200:30120/dynamic.json"
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(3500)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const clients = typeof data.clients === "number" ? data.clients : parseInt(data.clients);
+        const max = typeof data.maxClients === "number"
+          ? data.maxClients
+          : parseInt(data.sv_maxclients || data.maxClients || 128);
+
+        if (!isNaN(clients)) {
+          onlineCountEl.textContent = clients;
+          if (maxClientsEl && !isNaN(max)) maxClientsEl.textContent = max;
+          localStorage.setItem("dp_cached_fivem_status", JSON.stringify({ clients, maxClients: max, time: Date.now() }));
+          return;
+        }
       }
+    } catch (err) {
+      // Tenta próximo endpoint
+    }
+  }
+
+  // Se nenhum endpoint responder (offline ou sem proxy), utiliza cache recente ou 0
+  try {
+    const cached = JSON.parse(localStorage.getItem("dp_cached_fivem_status") || "null");
+    if (cached && typeof cached.clients === "number") {
+      onlineCountEl.textContent = cached.clients;
+      if (maxClientsEl && cached.maxClients) maxClientsEl.textContent = cached.maxClients;
+      return;
     }
   } catch {}
 
-  // Fallback visual realista
-  onlineCountEl.textContent = "78";
+  onlineCountEl.textContent = "0";
   if (maxClientsEl) maxClientsEl.textContent = "128";
 }
 
