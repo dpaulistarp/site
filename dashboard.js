@@ -63,20 +63,6 @@ const formatDate = (iso) => {
   }
 };
 
-const ROLE_DISPLAY_NAMES = {
-  ceo: "CEO (Master)",
-  diretor: "Diretor Geral",
-  gerente: "Gerente Operacional",
-  administrador: "Administrador",
-  moderador: "Moderador",
-  suporte: "Suporte",
-  player: "Cidadão"
-};
-
-const ROLE_EMOJIS = {
-  ceo: "👑", diretor: "⚜️", gerente: "💼", administrador: "⚖️", moderador: "🛡️", suporte: "🎧"
-};
-
 function hasPermission(key) {
   if (!state.user) return false;
   if (state.role === "ceo") return true;
