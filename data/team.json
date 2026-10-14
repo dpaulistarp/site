@@ -1,0 +1,50 @@
+[
+  {
+    "id": "user-ceo-01",
+    "name": "Blaze / Lomba / Morgan",
+    "email": "ceo@distritopaulista.com",
+    "role": "ceo",
+    "status": "active",
+    "password": "Distrito2026@"
+  },
+  {
+    "id": "user-dir-02",
+    "name": "Mariana Torres | ID: 12",
+    "email": "diretor@distritopaulista.com",
+    "role": "diretor",
+    "status": "active",
+    "password": "Staff2026@"
+  },
+  {
+    "id": "user-ger-03",
+    "name": "Carlos 'Kadu' Lima | ID: 45",
+    "email": "gerente@distritopaulista.com",
+    "role": "gerente",
+    "status": "active",
+    "password": "Staff2026@"
+  },
+  {
+    "id": "user-adm-04",
+    "name": "Felipe 'Falcon' Rocha | ID: 88",
+    "email": "admin@distritopaulista.com",
+    "role": "administrador",
+    "status": "active",
+    "password": "Staff2026@"
+  },
+  {
+    "id": "user-mod-05",
+    "name": "Beatriz 'Bia' Ramos | ID: 110",
+    "email": "moderador@distritopaulista.com",
+    "role": "moderador",
+    "status": "active",
+    "password": "Staff2026@"
+  },
+  {
+    "id": "user-sup-06",
+    "name": "Lucas Menezes | ID: 230",
+    "email": "suporte@distritopaulista.com",
+    "role": "suporte",
+    "status": "active",
+    "password": "Staff2026@"
+  }
+]

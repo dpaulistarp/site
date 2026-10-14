@@ -1,0 +1,50 @@
+[
+  {
+    "id": "app-101",
+    "game_name": "Thiago 'Coruja' Ramos | ID: 1042",
+    "discord_tag": "coruja_rp#4412",
+    "age": 21,
+    "desired_role": "suporte",
+    "availability": "Todos os dias das 18h às 00h",
+    "experience": "Mais de 1.800 horas de FiveM. Fui suporte durante 6 meses no servidor SP Capital e conheço todos os comandos de atendimento.",
+    "scenario1": "Gravo clipe, aplico freeze se necessário, puxo para atendimento e aplico advertência/banimento conforme manual.",
+    "scenario2": "A integridade da staff vem em primeiro lugar. Amizades não anulam infrações.",
+    "motivation": "Gosto de organizar e tirar dúvidas dos jogadores iniciantes.",
+    "status": "pending",
+    "created_at": "2026-10-04T22:15:00Z",
+    "reviewer": null,
+    "reviewed_at": null
+  },
+  {
+    "id": "app-102",
+    "game_name": "Larissa Silveira | ID: 843",
+    "discord_tag": "lari_silveira",
+    "age": 24,
+    "desired_role": "moderador",
+    "availability": "Segunda a Sexta das 14h às 20h",
+    "experience": "3 anos de FiveM, experiência em triagem de denúncias e tickets de atendimento.",
+    "scenario1": "Converso calmamente, analiso clipes dos envolvidos e busco solução pacífica de acordo com as diretrizes.",
+    "scenario2": "Tratamento estritamente imparcial com notificação da infração.",
+    "motivation": "Ajudar a manter a cidade limpa de anti-RP e VDM.",
+    "status": "approved",
+    "created_at": "2026-10-03T18:30:00Z",
+    "reviewer": "Blaze / Lomba / Morgan (CEO)",
+    "reviewed_at": "2026-10-04T10:00:00Z"
+  },
+  {
+    "id": "app-103",
+    "game_name": "Rodrigo Pires | ID: 310",
+    "discord_tag": "pires_gamer",
+    "age": 15,
+    "desired_role": "suporte",
+    "availability": "Finais de semana apenas",
+    "experience": "Pouca experiência, jogando há alguns meses.",
+    "scenario1": "Gritaria com quem fizesse VDM.",
+    "scenario2": "Tentaria ajudar meu amigo.",
+    "motivation": "Ter comandos de admin.",
+    "status": "rejected",
+    "created_at": "2026-10-02T11:00:00Z",
+    "reviewer": "Mariana Torres (Diretoria)",
+    "reviewed_at": "2026-10-02T16:40:00Z"
+  }
+]

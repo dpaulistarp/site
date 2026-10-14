@@ -338,7 +338,7 @@ function renderApplications() {
   }).join("");
 }
 
-function updateAppStatus(id, newStatus) {
+async function updateAppStatus(id, newStatus) {
   if (!hasPermission("can_review_applications")) {
     toast("Você não possui permissão para avaliar candidaturas.");
     return;
@@ -349,6 +349,20 @@ function updateAppStatus(id, newStatus) {
   app.status = newStatus;
   app.reviewer = `${state.user.name} (${ROLE_DISPLAY_NAMES[state.role]})`;
   app.review_date = new Date().toISOString();
+
+  // Sincronizar com a API central do servidor
+  try {
+    await fetch("/api/applications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: app.id,
+        status: newStatus,
+        reviewer: app.reviewer,
+        review_date: app.review_date
+      })
+    });
+  } catch (e) {}
 
   localStorage.setItem("dp_applications", JSON.stringify(state.applications));
   updateStats();
@@ -362,7 +376,7 @@ function updateAppStatus(id, newStatus) {
   if (!modal.classList.contains("hidden")) openViewAppModal(id);
 }
 
-function deleteApplication(id) {
+async function deleteApplication(id) {
   if (!hasPermission("can_delete_applications")) {
     toast("Sem permissão para excluir.");
     return;
@@ -370,6 +384,11 @@ function deleteApplication(id) {
   if (!confirm("Deseja realmente apagar esta candidatura permanentemente?")) return;
   const app = state.applications.find(a => a.id === id);
   state.applications = state.applications.filter(a => a.id !== id);
+
+  try {
+    await fetch(`/api/applications?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+  } catch (e) {}
+
   localStorage.setItem("dp_applications", JSON.stringify(state.applications));
   updateStats();
   renderApplications();
@@ -390,74 +409,78 @@ function openViewAppModal(id) {
 
   const contentEl = $("#viewAppContent");
 
-  if (app.answers && typeof app.answers === "object" && Object.keys(app.answers).length > 0) {
-    const entries = Object.entries(app.answers);
-    contentEl.innerHTML = `
-      <div style="background: rgba(10, 13, 20, 0.7); padding: 16px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-line); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px;">
-        <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Personagem</span><b style="color: var(--gold-vivid); font-size: 1.05rem;">${escapeHtml(app.game_name)}</b></div>
-        <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Discord</span><b style="color: var(--text-main);">${escapeHtml(app.discord_tag)}</b></div>
-        <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Idade Real</span><b style="color: var(--text-main);">${app.age} anos</b></div>
-        <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Data de Envio</span><b style="color: var(--text-main); font-size: 0.85rem;">${formatDate(app.created_at)}</b></div>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        ${entries.map(([question, answer], idx) => `
-          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-line); border-radius: 8px; padding: 14px 16px;">
-            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
-              <span style="background: rgba(245, 158, 11, 0.15); color: var(--gold-vivid); font-weight: 800; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; white-space: nowrap;">
-                Q${idx + 1}
-              </span>
-              <h5 style="color: var(--gold); font-size: 0.92rem; margin: 0; line-height: 1.4;">
-                ${escapeHtml(question)}
-              </h5>
-            </div>
-            <p style="margin: 0; color: var(--text-main); font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; padding-left: 32px;">
-              ${escapeHtml(answer || "Não informado")}
-            </p>
-          </div>
-        `).join("")}
-      </div>
-    `;
-  } else {
-    contentEl.innerHTML = `
-      <div style="background: rgba(10, 13, 20, 0.6); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-line); display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
-        <div><span style="font-size: 0.75rem; color: var(--text-subtle); display: block;">DISCORD</span><b style="color: var(--gold);">${escapeHtml(app.discord_tag)}</b></div>
-        <div><span style="font-size: 0.75rem; color: var(--text-subtle); display: block;">IDADE</span><b>${app.age} anos</b></div>
-        <div><span style="font-size: 0.75rem; color: var(--text-subtle); display: block;">CARGO PRETENDIDO</span><b style="text-transform: uppercase;">${escapeHtml(app.desired_role || "Suporte")}</b></div>
-      </div>
-      <div>
-        <h5 style="color: var(--gold-vivid); margin-bottom: 6px;">Disponibilidade Semanal:</h5>
-        <p style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid var(--border-line);">${escapeHtml(app.availability)}</p>
-      </div>
-      <div>
-        <h5 style="color: var(--gold-vivid); margin-bottom: 6px;">Tempo de RP & Experiência Prévia:</h5>
-        <p style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid var(--border-line);">${escapeHtml(app.experience)}</p>
-      </div>
-      <div>
-        <h5 style="color: var(--gold-vivid); margin-bottom: 6px;">Cenário 1 (VDM/RDM em Praça):</h5>
-        <p style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid var(--border-line);">${escapeHtml(app.scenario1 || "Não informado")}</p>
-      </div>
-      <div>
-        <h5 style="color: var(--gold-vivid); margin-bottom: 6px;">Cenário 2 (Denúncia contra Amigo com Provas):</h5>
-        <p style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid var(--border-line);">${escapeHtml(app.scenario2 || "Não informado")}</p>
-      </div>
-      <div>
-        <h5 style="color: var(--gold-vivid); margin-bottom: 6px;">Motivação para entrar na Equipe:</h5>
-        <p style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid var(--border-line);">${escapeHtml(app.motivation)}</p>
-      </div>
-    `;
+  // Garantir restauração de respostas completas
+  if ((!app.answers || Object.keys(app.answers).length === 0) && app.reviewer_notes) {
+    try {
+      const parsedNotes = JSON.parse(app.reviewer_notes);
+      if (parsedNotes && typeof parsedNotes === "object") {
+        app.answers = parsedNotes;
+      }
+    } catch {}
   }
 
-  const canReview = hasPermission("can_review_applications");
-  $("#viewAppActions").innerHTML = canReview ? `
-    <button class="btn btn-secondary" onclick="closeViewAppModal()">Fechar</button>
-    <button class="btn btn-danger" onclick="updateAppStatus('${app.id}', 'rejected')">Recusar</button>
-    <button class="btn btn-secondary" onclick="updateAppStatus('${app.id}', 'reviewing')">Em Análise</button>
-    <button class="btn btn-success" onclick="updateAppStatus('${app.id}', 'approved')">Aprovar p/ Entrevista</button>
-  ` : `<button class="btn btn-secondary" onclick="closeViewAppModal()">Fechar</button>`;
+  // Reconstituição de contingência se answers ainda estiver vazio
+  if (!app.answers || Object.keys(app.answers).length === 0) {
+    app.answers = {
+      "Personagem In-game": app.game_name || "Não informado",
+      "Discord Tag": app.discord_tag || "Não informado",
+      "Idade Real": app.age ? `${app.age} anos` : "Não informado",
+      "Cargo Pretendido": (app.desired_role || "Suporte").toUpperCase(),
+      "Disponibilidade Semanal": app.availability || "Não informado",
+      "Tempo de RP & Experiência Prévia": app.experience || "Não informado",
+      "Cenário 1 (VDM/RDM em Praça)": app.scenario1 || "Não informado",
+      "Cenário 2 (Denúncia contra Amigo com Provas)": app.scenario2 || "Não informado",
+      "Motivação para entrar na Equipe": app.motivation || "Não informado"
+    };
+  }
+
+  const entries = Object.entries(app.answers);
+  contentEl.innerHTML = `
+    <div style="background: rgba(10, 13, 20, 0.7); padding: 16px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-line); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px;">
+      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Personagem</span><b style="color: var(--gold-vivid); font-size: 1.05rem;">${escapeHtml(app.game_name)}</b></div>
+      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Discord</span><b style="color: var(--text-main);">${escapeHtml(app.discord_tag)}</b></div>
+      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Idade Real</span><b style="color: var(--text-main);">${app.age} anos</b></div>
+      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Data de Envio</span><b style="color: var(--text-main); font-size: 0.85rem;">${formatDate(app.created_at)}</b></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      ${entries.map(([question, answer], idx) => `
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-line); border-radius: 8px; padding: 14px 16px;">
+          <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+            <span style="background: rgba(245, 158, 11, 0.15); color: var(--gold-vivid); font-weight: 800; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; white-space: nowrap;">
+              Q${idx + 1}
+            </span>
+            <h5 style="color: var(--gold); font-size: 0.92rem; margin: 0; line-height: 1.4;">
+              ${escapeHtml(question)}
+            </h5>
+          </div>
+          <p style="margin: 0; color: var(--text-main); font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap; padding-left: 32px;">
+            ${escapeHtml(answer || "Não informado")}
+          </p>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  // Ações de avaliação no rodapé do modal
+  const actionsEl = $("#viewAppActions");
+  if (actionsEl) {
+    const canReview = hasPermission("can_review_applications");
+    if (canReview) {
+      actionsEl.innerHTML = `
+        <button class="btn btn-secondary" onclick="closeViewAppModal()">Fechar</button>
+        <button class="btn btn-secondary" onclick="updateAppStatus('${escapeHtml(app.id)}', 'reviewing')">Em Análise</button>
+        <button class="btn btn-danger" onclick="updateAppStatus('${escapeHtml(app.id)}', 'rejected')">Recusar</button>
+        <button class="btn btn-success" onclick="updateAppStatus('${escapeHtml(app.id)}', 'approved')">Aprovar p/ Entrevista</button>
+      `;
+    } else {
+      actionsEl.innerHTML = `<button class="btn btn-secondary" onclick="closeViewAppModal()">Fechar</button>`;
+    }
+  }
 
   modal.classList.remove("hidden");
 }
+
 
 function closeViewAppModal() {
   $("#viewAppModal").classList.add("hidden");
@@ -783,7 +806,7 @@ async function handleEditMemberName(e) {
   toast(`Nome alterado para "${newName}" com sucesso!`);
 }
 
-function changeMemberRole(id, newRole) {
+async function changeMemberRole(id, newRole) {
   if (!hasPermission("can_manage_staff")) {
     toast("Sem permissão para alterar cargos.");
     return;
@@ -792,27 +815,52 @@ function changeMemberRole(id, newRole) {
   if (!member) return;
   const oldRole = member.role;
   member.role = newRole;
+
+  try {
+    await fetch("/api/team", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, role: newRole })
+    });
+  } catch (e) {}
+
   localStorage.setItem("dp_team_members", JSON.stringify(state.team));
   renderTeamTable();
   toast(`Cargo de ${member.name} alterado para ${ROLE_DISPLAY_NAMES[newRole]}!`);
   recordAuditLog("Alteração de Cargo", `${member.name}: ${oldRole.toUpperCase()} ➔ ${newRole.toUpperCase()}`);
 }
 
-function toggleMemberStatus(id) {
+async function toggleMemberStatus(id) {
   const member = state.team.find(m => m.id === id);
   if (!member) return;
   member.status = member.status === "active" ? "suspended" : "active";
+
+  try {
+    await fetch("/api/team", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: member.status })
+    });
+  } catch (e) {}
+
   localStorage.setItem("dp_team_members", JSON.stringify(state.team));
   renderTeamTable();
   toast(`Status de ${member.name} alterado para ${member.status === "active" ? "Ativo" : "Bloqueado"}.`);
 }
 
-function removeMember(id) {
+async function removeMember(id) {
   if (!confirm("Remover este membro da equipe permanentemente?")) return;
+  const member = state.team.find(m => m.id === id);
   state.team = state.team.filter(m => m.id !== id);
+
+  try {
+    await fetch(`/api/team?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+  } catch (e) {}
+
   localStorage.setItem("dp_team_members", JSON.stringify(state.team));
   renderTeamTable();
   toast("Membro removido.");
+  recordAuditLog("Exclusão de Conta Staff", `Membro ${member?.name || id} removido da equipe`);
 }
 
 function openCreateUserModal() {
@@ -837,16 +885,17 @@ function generateSecurePassword() {
   return pwd;
 }
 
-function handleCreateUser(e) {
+async function handleCreateUser(e) {
   e.preventDefault();
   const name = $("#newStaffName").value.trim();
   const email = $("#newStaffEmail").value.trim().toLowerCase();
+  const password = ($("#newStaffPassword")?.value || "").trim();
   const role = $("#newStaffRole").value;
   const statusEl = $("#createUserStatus");
 
-  if (!name || !email) {
+  if (!name || !email || !password) {
     statusEl.className = "form-status error";
-    statusEl.textContent = "Preencha todos os campos.";
+    statusEl.textContent = "Preencha todos os campos, incluindo a senha.";
     return;
   }
 
@@ -854,15 +903,36 @@ function handleCreateUser(e) {
     id: "user-" + Date.now(),
     name,
     email,
+    password,
     role,
     status: "active",
     created_at: new Date().toISOString()
   };
 
-  state.team.push(newMember);
+  // 1. Salvar no servidor central (/api/team)
+  try {
+    await fetch("/api/team", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newMember)
+    });
+  } catch (err) {
+    console.warn("API team save:", err);
+  }
+
+  // 2. Salvar localmente
+  const existingIdx = state.team.findIndex(m => m.email.toLowerCase() === email);
+  if (existingIdx >= 0) {
+    state.team[existingIdx] = newMember;
+  } else {
+    state.team.push(newMember);
+  }
+
   localStorage.setItem("dp_team_members", JSON.stringify(state.team));
+  localStorage.setItem(`dp_pwd_${email}`, password);
+
   renderTeamTable();
-  toast(`Conta criada com sucesso para ${name}!`);
+  toast(`Conta criada com sucesso! E-mail: ${email} | Senha: ${password}`);
   recordAuditLog("Criação de Conta Staff", `${name} (${email}) cadastrado como ${role.toUpperCase()}`);
   closeCreateUserModal();
 }
@@ -1172,11 +1242,49 @@ window.toggleMemberStatus = toggleMemberStatus;
 window.removeMember = removeMember;
 window.setRecruitmentStatus = setRecruitmentStatus;
 
+async function syncFromServer() {
+  // 1. Sincronizar Candidaturas da API Central
+  try {
+    const resApps = await fetch("/api/applications");
+    if (resApps.ok) {
+      const serverApps = await resApps.json();
+      if (Array.isArray(serverApps) && serverApps.length > 0) {
+        serverApps.forEach(app => {
+          if ((!app.answers || Object.keys(app.answers).length === 0) && app.reviewer_notes) {
+            try {
+              const parsed = JSON.parse(app.reviewer_notes);
+              if (parsed && typeof parsed === "object") app.answers = parsed;
+            } catch {}
+          }
+        });
+        state.applications = serverApps;
+        localStorage.setItem("dp_applications", JSON.stringify(state.applications));
+        updateStats();
+        renderApplications();
+      }
+    }
+  } catch (e) {}
+
+  // 2. Sincronizar Equipe Staff da API Central
+  try {
+    const resTeam = await fetch("/api/team");
+    if (resTeam.ok) {
+      const serverTeam = await resTeam.json();
+      if (Array.isArray(serverTeam) && serverTeam.length > 0) {
+        state.team = serverTeam;
+        localStorage.setItem("dp_team_members", JSON.stringify(state.team));
+        renderTeamTable();
+      }
+    }
+  } catch (e) {}
+}
+
 async function init() {
   loadInitialData();
   setupTabs();
   renderRecruitmentControl();
   await checkAuthSession();
+  await syncFromServer();
 }
 
 init();

@@ -968,7 +968,18 @@ async function submitApplication(event) {
     reviewed_at: null
   };
 
-  // Se Supabase estiver conectado, salvar no banco PostgreSQL
+  // 1. Persistir na API central do servidor
+  try {
+    await fetch("/api/applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch (apiErr) {
+    console.warn("API applications save:", apiErr);
+  }
+
+  // 2. Se Supabase estiver conectado, salvar no banco PostgreSQL
   if (supabase) {
     try {
       const { error } = await supabase.from("applications").insert({
@@ -981,7 +992,7 @@ async function submitApplication(event) {
         scenario1: payload.scenario1.slice(0, 1950),
         scenario2: payload.scenario2.slice(0, 1950),
         motivation: payload.motivation.slice(0, 1950),
-        answers: allAnswers,
+        reviewer_notes: JSON.stringify(allAnswers),
         status: "pending"
       });
 
@@ -991,7 +1002,7 @@ async function submitApplication(event) {
     }
   }
 
-  // Persistir no histórico local
+  // 3. Persistir no histórico local
   state.applications.unshift(payload);
   localStorage.setItem("dp_applications", JSON.stringify(state.applications));
 
@@ -1043,8 +1054,32 @@ async function handleStatusLookup(event) {
 
   let match = null;
 
-  // 1. Tentar buscar no Supabase via RPC segura check_application_status
-  if (supabase) {
+  // 1. Tentar buscar na API central do servidor
+  try {
+    const apiRes = await fetch(`/api/applications/check?q=${encodeURIComponent(query)}`);
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data?.application) {
+        match = data.application;
+      }
+    }
+  } catch (err) {}
+
+  // 2. Tentar buscar no histórico local (localStorage)
+  if (!match) {
+    try {
+      const saved = JSON.parse(localStorage.getItem("dp_applications") || "[]");
+      const cleanQ = query.replace(/^#/, "");
+      match = saved.find(a => {
+        const dTag = (a.discord_tag || "").toLowerCase().replace(/^#/, "");
+        const gName = (a.game_name || "").toLowerCase();
+        return dTag === cleanQ || dTag.includes(cleanQ) || gName.includes(cleanQ);
+      });
+    } catch (e) {}
+  }
+
+  // 3. Tentar buscar no Supabase via RPC se disponível
+  if (!match && supabase) {
     try {
       const { data, error } = await supabase.rpc("check_application_status", { p_query: query });
       if (!error && data && data.length > 0) {
@@ -1182,16 +1217,26 @@ async function handleLogin(event) {
     submitBtn.innerHTML = "<span>Autenticando com segurança...</span>";
   }
 
-  // 1. Autenticação Oficial Supabase Auth
-  if (supabase) {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
+  // 1. Tentar autenticação na API Central do Servidor
+  try {
+    const apiRes = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data?.user) {
+        setAuthenticatedUser(data.user, true);
+        return;
+      }
+    } else if (apiRes.status === 401 || apiRes.status === 403) {
+      const errData = await apiRes.json().catch(() => ({}));
+      if (errData?.message) {
         if (status) {
           status.className = "form-status error";
-          status.textContent = error.message.includes("Invalid login credentials")
-            ? "E-mail ou senha incorretos no Supabase."
-            : `Erro de autenticação: ${error.message}`;
+          status.textContent = errData.message;
         }
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -1199,9 +1244,17 @@ async function handleLogin(event) {
         }
         return;
       }
+    }
+  } catch (apiErr) {
+    console.warn("API login fallback:", apiErr);
+  }
 
-      if (data?.user) {
-        const { data: profile, error: profileErr } = await supabase
+  // 2. Autenticação Supabase Auth (se existir conta criada no Auth)
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error && data?.user) {
+        const { data: profile } = await supabase
           .from("profiles")
           .select("*")
           .eq("user_id", data.user.id)
@@ -1215,34 +1268,14 @@ async function handleLogin(event) {
             role: profile.role
           }, true);
           return;
-        } else {
-          await supabase.auth.signOut();
-          if (status) {
-            status.className = "form-status error";
-            status.textContent = "Acesso negado: Esta conta não possui perfil de Staff configurado na tabela profiles.";
-          }
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = "<span>Entrar no Painel</span>";
-          }
-          return;
         }
       }
     } catch (e) {
-      console.warn("Supabase Auth signIn:", e);
-      if (status) {
-        status.className = "form-status error";
-        status.textContent = "Erro de conexão ao servidor de autenticação Supabase.";
-      }
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = "<span>Entrar no Painel</span>";
-      }
-      return;
+      console.warn("Supabase Auth signIn fallback:", e);
     }
   }
 
-  // 2. Autenticação Segura de Contas da Staff Locais / Cadastradas
+  // 3. Autenticação Segura de Contas da Staff Locais / Cadastradas no Painel
   let storedTeam = [];
   try {
     storedTeam = JSON.parse(localStorage.getItem("dp_team_members") || "[]");
