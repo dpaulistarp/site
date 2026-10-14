@@ -1082,7 +1082,7 @@ function setupTabs() {
 }
 
 function loadInitialData() {
-  const RULES_VERSION = "2026.10_v2";
+  const RULES_VERSION = "2026.10_v3";
   if (localStorage.getItem("dp_rules_version") !== RULES_VERSION) {
     localStorage.removeItem("dp_rules");
     localStorage.setItem("dp_rules_version", RULES_VERSION);

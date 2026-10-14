@@ -106,7 +106,7 @@ const copyToClipboard = async (text, successMsg = "Texto copiado com sucesso!") 
    CARREGAMENTO & PERSISTÊNCIA DE ESTADO LOCAL
    ========================================================================== */
 function loadStateFromStorage() {
-  const RULES_VERSION = "2026.10_v2";
+  const RULES_VERSION = "2026.10_v3";
   if (localStorage.getItem("dp_rules_version") !== RULES_VERSION) {
     localStorage.removeItem("dp_rules");
     localStorage.setItem("dp_rules_version", RULES_VERSION);
@@ -1384,14 +1384,28 @@ async function syncWithSupabase() {
     // 1. Carregar regras publicadas do banco
     const { data: rulesData, error: rulesErr } = await supabase.from("rules").select("*");
     if (!rulesErr && rulesData && rulesData.length > 0) {
+      let hasCustomUpdates = false;
       rulesData.forEach(row => {
-        if (row.category && row.title && row.content) {
+        if (!row.category || !row.title || !row.content) return;
+
+        // Proteção contra a semente mock antiga (8 regras resumidas com Dark RP Restrito)
+        // sobrescrever o manual oficial de 67 regras completas do data.js
+        const isOldDemoMock =
+          row.content.includes("Dark RP Restrito: Atos como tortura extrema") ||
+          row.content.includes("Negociação em Roubos: Em ocorrências de roubo com reféns") ||
+          row.content.includes("Saque de Itens (Looting): Permitido saquear apenas armas");
+
+        if (!isOldDemoMock) {
           state.rules[row.category] = { title: row.title, content: row.content };
+          hasCustomUpdates = true;
         }
       });
-      if ($("#rulesContent")) renderRules(state.currentRuleTab);
-      updateRuleCounts();
-      renderDynamicSections();
+
+      if (hasCustomUpdates) {
+        if ($("#rulesContent")) renderRules(state.currentRuleTab);
+        updateRuleCounts();
+        renderDynamicSections();
+      }
     }
 
     // 2. Checar sessão autenticada real
