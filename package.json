@@ -1,0 +1,15 @@
+{
+  "name": "distrito-paulista-rp",
+  "version": "1.0.0",
+  "description": "Distrito Paulista RP — Portal Oficial e Dashboard Staff",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve": "node server.js"
+  },
+  "keywords": ["fivem", "roleplay", "distrito-paulista"],
+  "author": "Distrito Paulista RP",
+  "license": "ISC"
+}

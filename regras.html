@@ -188,6 +188,30 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <script>
+    if (window.location.protocol === "file:") {
+      window.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("rulesContent");
+        if (container) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+              <div style="font-size: 3rem; margin-bottom: 15px;">⚠️</div>
+              <h2 style="color: #F59E0B; margin-bottom: 12px; font-family: 'Rajdhani', sans-serif; font-size: 1.8rem;">ATENÇÃO: PÁGINA ABERTA COMO ARQUIVO LOCAL (FILE://)</h2>
+              <p style="color: #E2E8F0; max-width: 650px; margin: 0 auto 20px; line-height: 1.6; font-size: 1rem;">
+                Por proteção de segurança padrão dos navegadores (política de <strong>CORS</strong>), scripts modernos em módulos JavaScript (ES Modules) e banco de dados <strong>são bloqueados quando abertos com dois cliques direto no arquivo .html</strong>. Por isso a tela ficava carregando infinitamente.
+              </p>
+              <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 20px; max-width: 620px; margin: 0 auto; text-align: left;">
+                <h4 style="color: #FBBF24; margin-bottom: 12px; font-size: 1.1rem;">👉 Como abrir o site corretamente (1 clique):</h4>
+                <p style="color: #CBD5E1; margin-bottom: 10px;"><strong>Opção 1 (Mais fácil):</strong> Dê dois cliques no arquivo <code style="background: #111; color: #FBBF24; padding: 3px 8px; border-radius: 4px; font-weight: bold;">iniciar.bat</code> na pasta do projeto.</p>
+                <p style="color: #CBD5E1; margin-bottom: 10px;"><strong>Opção 2:</strong> Abra o terminal na pasta e digite: <code style="background: #111; color: #10B981; padding: 3px 8px; border-radius: 4px; font-weight: bold;">npm start</code> (ou <code style="background: #111; color: #10B981; padding: 3px 8px; border-radius: 4px;">node server.js</code>)</p>
+                <p style="color: #94A3B8; margin-top: 14px; font-size: 0.95rem;">Depois acesse no seu navegador: <a href="http://localhost:5500/regras.html" style="color: #60A5FA; text-decoration: underline; font-weight: 600;">http://localhost:5500/regras.html</a></p>
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
+  </script>
   <script type="module" src="./script.js"></script>
 </body>
 </html>

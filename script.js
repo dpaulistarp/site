@@ -482,11 +482,17 @@ function setActiveRuleTab(tabKey) {
 }
 
 function updateRuleCounts() {
-  Object.keys(DEFAULT_RULES).forEach(key => {
-    const countEl = $(`#count${key.charAt(0).toUpperCase() + key.slice(1)}`);
-    if (countEl && state.rules[key]?.content) {
+  const countMap = {
+    gerais: $("#countGerais"),
+    policia: $("#countPolicia"),
+    ilegal: $("#countIlegal"),
+    codigo_penal: $("#countPenal")
+  };
+
+  Object.entries(countMap).forEach(([key, el]) => {
+    if (el && state.rules[key]?.content) {
       const lines = state.rules[key].content.split("\n").filter(l => l.trim().length > 0);
-      countEl.textContent = lines.length;
+      el.textContent = lines.length;
     }
   });
 }
@@ -1370,19 +1376,6 @@ function checkInitialAuth() {
 /* ==========================================================================
    SINCRONIZAÇÃO GERAL COM SUPABASE CLOUD
    ========================================================================== */
-function loadStateFromStorage() {
-  try {
-    const savedRules = localStorage.getItem("dp_rules");
-    if (savedRules) {
-      const parsed = JSON.parse(savedRules);
-      if (parsed && typeof parsed === "object") {
-        Object.assign(state.rules, parsed);
-      }
-    }
-  } catch (e) {
-    console.warn("Storage load:", e);
-  }
-}
 
 async function syncWithSupabase() {
   if (!supabase) return;
