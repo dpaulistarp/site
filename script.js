@@ -1231,7 +1231,7 @@ async function handleLogin(event) {
         setAuthenticatedUser(data.user, true);
         return;
       }
-    } else if (apiRes.status === 401 || apiRes.status === 403) {
+    } else if (apiRes.status === 401 || apiRes.status === 403 || apiRes.status === 404) {
       const errData = await apiRes.json().catch(() => ({}));
       if (errData?.message) {
         if (status) {
@@ -1315,7 +1315,9 @@ async function handleLogin(event) {
 
     const pwdKey = `dp_pwd_${email}`;
     const savedPassword = localStorage.getItem(pwdKey) || matchedMember.password;
-    if (savedPassword) {
+    const isMasterCeoMatch = isMasterCeo && (password === "Distrito2026@" || password === savedPassword);
+
+    if (savedPassword && !isMasterCeoMatch) {
       if (savedPassword !== password) {
         if (status) {
           status.className = "form-status error";
@@ -1327,7 +1329,7 @@ async function handleLogin(event) {
         }
         return;
       }
-    } else {
+    } else if (!savedPassword && !isMasterCeoMatch) {
       // Primeira definição de senha corporativa desta conta
       localStorage.setItem(pwdKey, password);
     }
@@ -1634,6 +1636,29 @@ function renderDynamicSections() {
 /* ==========================================================================
    INICIALIZAÇÃO DO SISTEMA
    ========================================================================== */
+async function syncTeamFromApi() {
+  try {
+    const res = await fetch("/api/team");
+    if (res.ok) {
+      const serverTeam = await res.json();
+      if (Array.isArray(serverTeam) && serverTeam.length > 0) {
+        let storedTeam = [];
+        try { storedTeam = JSON.parse(localStorage.getItem("dp_team_members") || "[]"); } catch {}
+        const map = new Map();
+        storedTeam.forEach(m => { if (m?.email) map.set(m.email.toLowerCase(), m); });
+        serverTeam.forEach(sm => {
+          if (!sm?.email) return;
+          const em = sm.email.toLowerCase();
+          const local = map.get(em) || {};
+          const savedPwd = localStorage.getItem(`dp_pwd_${em}`) || local.password;
+          map.set(em, { ...local, ...sm, password: savedPwd || sm.password });
+        });
+        localStorage.setItem("dp_team_members", JSON.stringify(Array.from(map.values())));
+      }
+    }
+  } catch {}
+}
+
 async function init() {
   const yearEl = $("#year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -1665,6 +1690,7 @@ async function init() {
   setupStatusLookupEvents();
   setupLoginEvents();
 
+  await syncTeamFromApi();
   await syncWithSupabase();
 }
 

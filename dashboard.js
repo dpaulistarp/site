@@ -284,9 +284,16 @@ function renderApplications() {
   const container = $("#dashApplicationsList");
   if (!container) return;
 
-  let list = state.applications;
-  if (filter !== "all") list = list.filter(a => a.status === filter);
-  if (search) list = list.filter(a => a.game_name.toLowerCase().includes(search) || a.discord_tag.toLowerCase().includes(search));
+  let list = state.applications || [];
+  if (filter !== "all") list = list.filter(a => a && a.status === filter);
+  if (search) {
+    list = list.filter(a => {
+      if (!a) return false;
+      const name = (a.game_name || "").toLowerCase();
+      const tag = (a.discord_tag || "").toLowerCase();
+      return name.includes(search) || tag.includes(search);
+    });
+  }
 
   if (!list.length) {
     container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 40px;">Nenhuma candidatura encontrada.</p>`;
@@ -297,27 +304,35 @@ function renderApplications() {
   const canDelete = hasPermission("can_delete_applications");
 
   container.innerHTML = list.map(app => {
+    if (!app) return "";
     const statusLabels = { pending: "Pendente", reviewing: "Em Análise", approved: "Aprovado", rejected: "Recusado" };
+    const role = (app.desired_role || "suporte").toLowerCase();
+    const gameName = escapeHtml(app.game_name || "Candidato sem nome");
+    const discordTag = escapeHtml(app.discord_tag || "Não informado");
+    const ageText = app.age ? `${app.age} anos` : "N/I";
+    const availText = escapeHtml(app.availability || "Disponibilidade não informada");
+    const reviewerText = app.reviewer ? escapeHtml(app.reviewer) : "Aguardando comissão";
+
     return `
       <article class="application-card-item">
         <div class="app-card-top">
           <div class="app-player-info">
-            <div class="player-avatar-badge">${ROLE_EMOJIS[app.desired_role] || "🎮"}</div>
+            <div class="player-avatar-badge">${ROLE_EMOJIS[role] || "🎮"}</div>
             <div class="app-player-meta">
-              <h4>${escapeHtml(app.game_name)}</h4>
-              <span>Discord: <b>${escapeHtml(app.discord_tag)}</b> • Idade: <b>${app.age} anos</b></span>
+              <h4>${gameName}</h4>
+              <span>Discord: <b>${discordTag}</b> • Idade: <b>${ageText}</b></span>
             </div>
           </div>
           <div class="flex-align-center gap-12">
-            <span class="role-pill ${escapeHtml(app.desired_role)}">Pretende: ${escapeHtml(app.desired_role.toUpperCase())}</span>
-            <span class="badge ${escapeHtml(app.status)}">${statusLabels[app.status] || app.status}</span>
+            <span class="role-pill ${escapeHtml(role)}">Pretende: ${escapeHtml(role.toUpperCase())}</span>
+            <span class="badge ${escapeHtml(app.status || "pending")}">${statusLabels[app.status] || app.status || "Pendente"}</span>
           </div>
         </div>
 
         <div class="app-snippet-grid">
-          <div><span>Disponibilidade</span><p>${escapeHtml(app.availability)}</p></div>
+          <div><span>Disponibilidade</span><p>${availText}</p></div>
           <div><span>Data de Envio</span><p>${formatDate(app.created_at)}</p></div>
-          <div><span>Avaliador</span><p>${app.reviewer ? escapeHtml(app.reviewer) : "Aguardando comissão"}</p></div>
+          <div><span>Avaliador</span><p>${reviewerText}</p></div>
         </div>
 
         <div class="app-card-actions">
@@ -364,6 +379,16 @@ async function updateAppStatus(id, newStatus) {
     });
   } catch (e) {}
 
+  // Sincronizar com o Supabase se conectado
+  if (supabase) {
+    try {
+      await supabase.from("applications").update({
+        status: newStatus,
+        reviewed_at: app.review_date
+      }).eq("id", app.id);
+    } catch (e) {}
+  }
+
   localStorage.setItem("dp_applications", JSON.stringify(state.applications));
   updateStats();
   renderApplications();
@@ -389,6 +414,12 @@ async function deleteApplication(id) {
     await fetch(`/api/applications?id=${encodeURIComponent(id)}`, { method: "DELETE" });
   } catch (e) {}
 
+  if (supabase) {
+    try {
+      await supabase.from("applications").delete().eq("id", id);
+    } catch (e) {}
+  }
+
   localStorage.setItem("dp_applications", JSON.stringify(state.applications));
   updateStats();
   renderApplications();
@@ -398,48 +429,52 @@ async function deleteApplication(id) {
 }
 
 function openViewAppModal(id) {
-  const app = state.applications.find(a => a.id === id);
+  const app = state.applications.find(a => a && a.id === id);
   if (!app) return;
 
   const modal = $("#viewAppModal");
-  $("#viewAppTitle").textContent = `Ficha de ${app.game_name}`;
+  $("#viewAppTitle").textContent = `Ficha de ${app.game_name || "Candidato"}`;
   const badge = $("#modalAppBadge");
-  badge.className = `badge ${app.status}`;
-  badge.textContent = app.status.toUpperCase();
+  const appStatus = app.status || "pending";
+  badge.className = `badge ${appStatus}`;
+  badge.textContent = appStatus.toUpperCase();
 
   const contentEl = $("#viewAppContent");
 
   // Garantir restauração de respostas completas
-  if ((!app.answers || Object.keys(app.answers).length === 0) && app.reviewer_notes) {
+  let answers = app.answers;
+  if ((!answers || typeof answers !== "object" || Object.keys(answers).length === 0) && app.reviewer_notes) {
     try {
       const parsedNotes = JSON.parse(app.reviewer_notes);
       if (parsedNotes && typeof parsedNotes === "object") {
+        answers = parsedNotes;
         app.answers = parsedNotes;
       }
     } catch {}
   }
 
   // Reconstituição de contingência se answers ainda estiver vazio
-  if (!app.answers || Object.keys(app.answers).length === 0) {
-    app.answers = {
+  if (!answers || typeof answers !== "object" || Object.keys(answers).length === 0) {
+    answers = {
       "Personagem In-game": app.game_name || "Não informado",
       "Discord Tag": app.discord_tag || "Não informado",
       "Idade Real": app.age ? `${app.age} anos` : "Não informado",
       "Cargo Pretendido": (app.desired_role || "Suporte").toUpperCase(),
       "Disponibilidade Semanal": app.availability || "Não informado",
-      "Tempo de RP & Experiência Prévia": app.experience || "Não informado",
-      "Cenário 1 (VDM/RDM em Praça)": app.scenario1 || "Não informado",
-      "Cenário 2 (Denúncia contra Amigo com Provas)": app.scenario2 || "Não informado",
+      "Tempo de RP & Experiência": app.experience || "Não informado",
+      "Cenário 1 (Jogador nervoso/desrespeitoso)": app.scenario1 || "Não informado",
+      "Cenário 2 (Amigo quebrando regras)": app.scenario2 || "Não informado",
       "Motivação para entrar na Equipe": app.motivation || "Não informado"
     };
+    app.answers = answers;
   }
 
-  const entries = Object.entries(app.answers);
+  const entries = Object.entries(answers);
   contentEl.innerHTML = `
     <div style="background: rgba(10, 13, 20, 0.7); padding: 16px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-line); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px;">
-      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Personagem</span><b style="color: var(--gold-vivid); font-size: 1.05rem;">${escapeHtml(app.game_name)}</b></div>
-      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Discord</span><b style="color: var(--text-main);">${escapeHtml(app.discord_tag)}</b></div>
-      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Idade Real</span><b style="color: var(--text-main);">${app.age} anos</b></div>
+      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Personagem</span><b style="color: var(--gold-vivid); font-size: 1.05rem;">${escapeHtml(app.game_name || "Não informado")}</b></div>
+      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Discord</span><b style="color: var(--text-main);">${escapeHtml(app.discord_tag || "Não informado")}</b></div>
+      <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Idade Real</span><b style="color: var(--text-main);">${app.age ? `${app.age} anos` : "Não informada"}</b></div>
       <div><span style="font-size: 0.72rem; color: var(--text-subtle); display: block; text-transform: uppercase;">Data de Envio</span><b style="color: var(--text-main); font-size: 0.85rem;">${formatDate(app.created_at)}</b></div>
     </div>
 
@@ -911,19 +946,20 @@ async function handleCreateUser(e) {
 
   // 1. Salvar no servidor central (/api/team)
   try {
-    await fetch("/api/team", {
+    const res = await fetch("/api/team", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newMember)
     });
+    if (!res.ok) console.warn("Aviso ao salvar /api/team:", res.status);
   } catch (err) {
     console.warn("API team save:", err);
   }
 
-  // 2. Salvar localmente
+  // 2. Salvar localmente preservando senha e credenciais
   const existingIdx = state.team.findIndex(m => m.email.toLowerCase() === email);
   if (existingIdx >= 0) {
-    state.team[existingIdx] = newMember;
+    state.team[existingIdx] = { ...state.team[existingIdx], ...newMember };
   } else {
     state.team.push(newMember);
   }
@@ -931,6 +967,8 @@ async function handleCreateUser(e) {
   localStorage.setItem("dp_team_members", JSON.stringify(state.team));
   localStorage.setItem(`dp_pwd_${email}`, password);
 
+  // 3. Limpar formulário e atualizar interface
+  $("#createUserForm")?.reset();
   renderTeamTable();
   toast(`Conta criada com sucesso! E-mail: ${email} | Senha: ${password}`);
   recordAuditLog("Criação de Conta Staff", `${name} (${email}) cadastrado como ${role.toUpperCase()}`);
@@ -1122,6 +1160,9 @@ function switchTab(tabKey) {
   if (target) {
     target.classList.add("active");
   }
+  if (tabKey === "applications") {
+    syncFromServer();
+  }
 }
 
 function setupTabs() {
@@ -1139,6 +1180,9 @@ function setupTabs() {
 
   $("#dashAppFilter")?.addEventListener("change", renderApplications);
   $("#dashAppSearch")?.addEventListener("input", renderApplications);
+  $("#btnRefreshApps")?.addEventListener("click", () => {
+    syncFromServer(true);
+  });
 
   $("#btnRecruitmentOpen")?.addEventListener("click", () => setRecruitmentStatus(true));
   $("#btnRecruitmentClose")?.addEventListener("click", () => setRecruitmentStatus(false));
@@ -1242,41 +1286,110 @@ window.toggleMemberStatus = toggleMemberStatus;
 window.removeMember = removeMember;
 window.setRecruitmentStatus = setRecruitmentStatus;
 
-async function syncFromServer() {
-  // 1. Sincronizar Candidaturas da API Central
+async function syncFromServer(notifyUser = false) {
+  let hasChanges = false;
+  const mergedMap = new Map();
+
+  // 1. Manter candidaturas atuais já carregadas
+  (state.applications || []).forEach(a => {
+    if (a && a.id) mergedMap.set(String(a.id), a);
+  });
+
+  // 2. Sincronizar da API Local do Servidor (Node ou PowerShell)
   try {
-    const resApps = await fetch("/api/applications");
+    const resApps = await fetch("/api/applications", { signal: AbortSignal.timeout(3500) });
     if (resApps.ok) {
       const serverApps = await resApps.json();
-      if (Array.isArray(serverApps) && serverApps.length > 0) {
+      if (Array.isArray(serverApps)) {
         serverApps.forEach(app => {
-          if ((!app.answers || Object.keys(app.answers).length === 0) && app.reviewer_notes) {
+          if (!app || !app.id) return;
+          const existing = mergedMap.get(String(app.id)) || {};
+          let answers = (app.answers && Object.keys(app.answers).length > 0) ? app.answers : null;
+          if (!answers && app.reviewer_notes) {
             try {
               const parsed = JSON.parse(app.reviewer_notes);
-              if (parsed && typeof parsed === "object") app.answers = parsed;
+              if (parsed && typeof parsed === "object") answers = parsed;
             } catch {}
           }
+          if (!answers && existing.answers && Object.keys(existing.answers).length > 0) {
+            answers = existing.answers;
+          }
+          mergedMap.set(String(app.id), { ...existing, ...app, answers: answers || {} });
+          hasChanges = true;
         });
-        state.applications = serverApps;
-        localStorage.setItem("dp_applications", JSON.stringify(state.applications));
-        updateStats();
-        renderApplications();
       }
     }
   } catch (e) {}
 
-  // 2. Sincronizar Equipe Staff da API Central
+  // 3. Sincronizar também do Supabase (Nuvem PostgreSQL) se conectado
+  if (supabase) {
+    try {
+      const { data: supaApps, error } = await supabase
+        .from("applications")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && Array.isArray(supaApps)) {
+        supaApps.forEach(app => {
+          if (!app || !app.id) return;
+          const existing = mergedMap.get(String(app.id)) || {};
+          let answers = (app.answers && Object.keys(app.answers).length > 0) ? app.answers : null;
+          if (!answers && app.reviewer_notes) {
+            try {
+              const parsed = JSON.parse(app.reviewer_notes);
+              if (parsed && typeof parsed === "object") answers = parsed;
+            } catch {}
+          }
+          if (!answers && existing.answers && Object.keys(existing.answers).length > 0) {
+            answers = existing.answers;
+          }
+          mergedMap.set(String(app.id), { ...existing, ...app, answers: answers || {} });
+          hasChanges = true;
+        });
+      }
+    } catch (e) {}
+  }
+
+  // 4. Se tivermos candidaturas no mapa, organiza por data mais recente
+  if (mergedMap.size > 0) {
+    const list = Array.from(mergedMap.values()).sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateB - dateA;
+    });
+    state.applications = list;
+    localStorage.setItem("dp_applications", JSON.stringify(state.applications));
+    updateStats();
+    renderApplications();
+  }
+
+  // 5. Sincronizar Equipe Staff da API Central (preservando credenciais locais)
   try {
-    const resTeam = await fetch("/api/team");
+    const resTeam = await fetch("/api/team", { signal: AbortSignal.timeout(3500) });
     if (resTeam.ok) {
       const serverTeam = await resTeam.json();
       if (Array.isArray(serverTeam) && serverTeam.length > 0) {
-        state.team = serverTeam;
+        const teamMap = new Map();
+        (state.team || []).forEach(m => {
+          if (m && m.email) teamMap.set(m.email.toLowerCase(), m);
+        });
+        serverTeam.forEach(sm => {
+          if (!sm || !sm.email) return;
+          const em = sm.email.toLowerCase();
+          const local = teamMap.get(em) || {};
+          const savedPwd = localStorage.getItem(`dp_pwd_${em}`) || local.password;
+          teamMap.set(em, { ...local, ...sm, password: savedPwd || sm.password });
+        });
+        state.team = Array.from(teamMap.values());
         localStorage.setItem("dp_team_members", JSON.stringify(state.team));
         renderTeamTable();
       }
     }
   } catch (e) {}
+
+  if (notifyUser) {
+    toast(`Candidaturas sincronizadas com sucesso (${state.applications.length} encontradas)!`);
+  }
 }
 
 async function init() {
@@ -1285,6 +1398,22 @@ async function init() {
   renderRecruitmentControl();
   await checkAuthSession();
   await syncFromServer();
+
+  // Ouvir envio de novas candidaturas em outras abas
+  window.addEventListener("storage", (e) => {
+    if (e.key === "dp_applications") {
+      try {
+        state.applications = JSON.parse(e.newValue || "[]");
+        updateStats();
+        renderApplications();
+      } catch {}
+    }
+  });
+
+  // Polling automático suave em segundo plano (a cada 7 segundos)
+  setInterval(() => {
+    syncFromServer();
+  }, 7000);
 }
 
 init();

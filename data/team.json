@@ -46,5 +46,23 @@
     "role": "suporte",
     "status": "active",
     "password": "Staff2026@"
+  },
+  {
+    "id": "user-1792025190781",
+    "name": "Teste Staff",
+    "email": "testestaff@distritopaulista.com",
+    "role": "moderador",
+    "password": "MinhaSenha123@",
+    "status": "active",
+    "created_at": "2026-10-15T00:46:30.781Z"
+  },
+  {
+    "id": "user-1792026055579",
+    "name": "Novo Moderador 1792026055567",
+    "email": "moderador_1792026055567@distritopaulista.com",
+    "role": "moderador",
+    "password": "SenhaForte2026@",
+    "status": "active",
+    "created_at": "2026-10-15T01:00:55.579Z"
   }
 ]
